@@ -36,12 +36,16 @@ if [ "$org" ]; then
     fi
 fi;
 
+if [ -z "$DIST_TAG" ]; then
+    DIST_TAG="latest";
+fi;
+
 npm version patch;
 
 git push;
 git push --tags;
 npm run flatten;
-npm publish;
+npm publish --tag $DIST_TAG;
 git checkout package.json;
 git checkout package-lock.json;
 
