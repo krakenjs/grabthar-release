@@ -3,7 +3,7 @@
 set -e;
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-$DIR/validate.sh;
+$DIR/grabthar-validate;
 
 if npm whoami &> /dev/null; then
     echo "npm username: $(npm whoami)"

@@ -3,7 +3,7 @@
 set -e;
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-$DIR/validate.sh;
+$DIR/grabthar-validate;
 
 if [ -z "$1" ]; then
     npx npm-check-updates --prod --upgrade
