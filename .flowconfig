@@ -1,0 +1,12 @@
+[ignore]
+.*/dist/module
+.*/node_modules/npm
+.*/node_modules/npmi
+[include]
+[libs]
+flow-typed
+node_modules/grumbler-scripts/declarations.js
+[options]
+module.name_mapper='^src\(.*\)$' -> '<PROJECT_ROOT>/src/\1'
+experimental.const_params=false
+esproposal.export_star_as=enable

@@ -1,0 +1,68 @@
+{
+  "name": "grabthar-release",
+  "version": "1.0.0",
+  "description": "Helper scripts for grabthar releases.",
+  "main": "index.js",
+  "scripts": {
+    "cdnify": "babel-node scripts/cdnify.js --recursive",
+    "flow-typed": "rm -rf ./flow-typed && flow-typed install",
+    "lint": "eslint scripts/",
+    "flow": "flow check",
+    "test": "npm run lint && npm run flow-typed && npm run flow",
+    "babel": "babel scripts --ignore=node_modules --out-dir scripts --source-maps inline",
+    "prepublish": "in-publish && npm run babel || not-in-publish",
+    "postpublish": "git checkout ./scripts"
+  },
+  "bin": {
+    "grabthar-activate": "./scripts/activate.sh",
+    "grabthar-add": "./scripts/add.sh",
+    "grabthar-cdnify": "./scripts/cdnify.js",
+    "grabthar-flatten": "./scripts/flatten.sh",
+    "grabthar-prune": "./scripts/prune.js",
+    "grabthar-release": "./scripts/release.sh",
+    "grabthar-remove": "./scripts/remove.sh",
+    "grabthar-upgrade": "./scripts/upgrade.sh",
+    "grabthar-validate": "./scripts/validate.sh"
+  },
+  "files": [
+    "scripts"
+  ],
+  "engines": {
+    "node": ">=12",
+    "npm": ">=6"
+  },
+  "config": {
+    "engine-strict": true
+  },
+  "browserslist": [
+    "IE >= 9",
+    "chrome >= 27",
+    "firefox >= 30",
+    "safari >= 5",
+    "opera >= 23"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/krakenjs/grumbler.git"
+  },
+  "keywords": [
+    "template"
+  ],
+  "licenses": [
+    {
+      "type": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  ],
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "check-node-version": "^4.0.3",
+    "command-line-args": "^5.1.1",
+    "download": "^8.0.0",
+    "flow-bin": "^0.85.0",
+    "fs-extra": "^5.0.0",
+    "grumbler-scripts": "^3",
+    "node-fetch": "^2.6.0",
+    "npm": "^6.14.0"
+  }
+}
