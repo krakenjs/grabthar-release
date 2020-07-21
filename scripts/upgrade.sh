@@ -10,7 +10,7 @@ if [ -z "$1" ]; then
 else
     if ! npm ls "$1"; then
         npm install --only=production --production --save --save-exact "$1"
-        node $DIR/prune.js;
+        node $DIR/grabthar-prune;
     else
         npx npm-check-updates --prod --upgrade --filter="$1"
     fi;
@@ -31,7 +31,7 @@ rm -rf ./node_modules;
 rm -f ./package-lock.json;
 
 npm install --production;
-node $DIR/prune.js;
+node $DIR/grabthar-prune;
 
 git add package.json;
 git add package-lock.json;
