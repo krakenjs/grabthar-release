@@ -237,6 +237,17 @@ const getPassword = async (user) => {
     return value;
 };
 
+const getYesNo = async (message) => {
+    const { value } = await prompt([
+        {
+            type: 'confirm',
+            message,
+            name: 'value'
+        }
+    ]);
+    return value;
+};
+
 const web = async (cmd) => {
     return await exec(`JENKINS_HOME=1 SVC_ACC_USERNAME=${ options.requester } SVC_ACC_PASSWORD=${ await getPassword(options.requester) } npx @paypalcorp/web ${ cmd }`);
 };
@@ -292,6 +303,11 @@ const cdnifyDeploy = async () => {
 
 const run = async () => {
     await cdnifyGenerate(options.module);
+
+    if (!await getYesNo('Commit and deploy?')) {
+        return;
+    }
+
     await cdnifyCommit();
     await cdnifyDeploy();
 };
