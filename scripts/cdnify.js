@@ -3,14 +3,15 @@
 /* @flow */
 /* eslint import/no-commonjs: off */
 
-const { join, extname } = require('path');
-const { userInfo } = require('os');
+import { join, extname } from 'path';
+import { userInfo } from 'os';
 
-const fetch = require('node-fetch');
-const { ensureDir, outputFile, exists, existsSync, readFileSync } = require('fs-extra');
-const download = require('download');
-const commandLineArgs = require('command-line-args');
-const shell = require('shelljs');
+import fetch from 'node-fetch';
+import { ensureDir, outputFile, exists, existsSync, readFileSync } from 'fs-extra';
+import download from 'download';
+import commandLineArgs from 'command-line-args';
+import shell from 'shelljs';
+import { prompt } from 'inquirer';
 
 type Package = {|
     name : string,
@@ -56,7 +57,10 @@ const options = commandLineArgs([
     { name: 'recursive', type: Boolean, defaultValue: false },
     { name: 'package', type: String, defaultValue: join(process.cwd(), 'package.json') },
     { name: 'packagelock', type: String, defaultValue: join(process.cwd(), 'package-lock.json') },
-    { name: 'nodeops', type: String, defaultValue: join(process.cwd(), '.nodeops') }
+    { name: 'nodeops', type: String, defaultValue: join(process.cwd(), '.nodeops') },
+    { name: 'cdnapi', type: String, defaultValue: 'https://cdnx-api.qa.paypal.com' },
+    { name: 'requester', type: String, defaultValue: 'svc-xo' },
+    { name: 'approver', type: String, defaultValue: userInfo().username }
 ]);
 
 const getPackage = () : Package => {
@@ -196,10 +200,10 @@ const cdnifyGenerate = async (name : string) => {
     }
 };
 
-const exec = (cmd) => {
+const exec = async (cmd) => {
     // eslint-disable-next-line no-console
     console.log(`> ${ cmd }\n`);
-    const result = shell.exec(cmd);
+    const result = await shell.exec(cmd);
     if (result.code !== 0) {
         throw new Error(result.stderr || result.stdout || `Command failed with code ${ result.code }`);
     }
@@ -208,6 +212,32 @@ const exec = (cmd) => {
     } catch (err) {
         return result.stdout;
     }
+};
+
+const passwords = {};
+
+const getPassword = async (user) => {
+    if (passwords[user]) {
+        return passwords[user];
+    }
+
+    const { value } = await prompt([
+        {
+            type:    'password',
+            message: `Enter password for ${ user }:`,
+            name:    'value',
+            mask:    '*'
+        }
+    ]);
+
+    // eslint-disable-next-line require-atomic-updates
+    passwords[user] = value;
+
+    return value;
+};
+
+const web = async (cmd) => {
+    return await exec(`JENKINS_HOME=1 SVC_ACC_USERNAME=${ options.requester } SVC_ACC_PASSWORD=${ await getPassword(options.requester) } npx @paypalcorp/web ${ cmd }`);
 };
 
 const sleep = (time : number) => {
@@ -227,15 +257,15 @@ const cdnifyCommit = async () => {
 };
 
 const cdnifyDeploy = async () => {
-    const { id } = await exec('npx @paypalcorp/web stage --json');
+    const { id } = await web(`stage --json`);
 
     try {
-        await exec(`npx @paypalcorp/web notify ${ id }`);
+        await await web(`notify ${ id }`);
     } catch (err) {
         // pass
     }
 
-    const approveRes = await fetch(`https://cdnx-api.qa.paypal.com/assets/approve/${ id }?requestor=svc-xo&approver=${ userInfo().username }`);
+    const approveRes = await fetch(`${ options.cdnapi }/assets/approve/${ id }?requestor=${ options.requester }&approver=${ options.approver }`);
     await approveRes.text();
 
     await sleep(3 * 1000);
@@ -244,13 +274,13 @@ const cdnifyDeploy = async () => {
         throw new Error(`Approval failed with status ${ approveRes.status }`);
     }
 
-    await exec(`npx @paypalcorp/web deploy ${ id }`);
+    await await web(`deploy ${ id }`);
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
         await sleep(10 * 1000);
         try {
-            await exec(`npx @paypalcorp/web status ${ id } --all`);
+            await await web(`status ${ id } --all`);
         } catch (err) {
             continue;
         }
