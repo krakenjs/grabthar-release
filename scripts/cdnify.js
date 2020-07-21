@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /* @flow */
 /* eslint import/no-commonjs: off */
 
@@ -193,6 +195,6 @@ const cdnifyAll = async (name : string) => {
 cdnifyAll(options.module).catch((err) => {
     // eslint-disable-next-line no-console
     console.error(err);
-    // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
+    // eslint-disable-next-line no-process-exit
     process.exit(1);
 });
