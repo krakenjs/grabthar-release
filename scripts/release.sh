@@ -48,9 +48,6 @@ git checkout package-lock.json;
 sleep 5;
 
 $DIR/grabthar-cdnify --recursive --cdn="$CDN";
-git add cdn;
-git commit -m "Bundle CDN packages";
-git push;
 
 # TODO:
 # - Validate CDNX command available

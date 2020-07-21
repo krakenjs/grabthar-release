@@ -41,9 +41,6 @@ done;
 sleep 5;
 
 $DIR/grabthar-cdnify --cdn="$CDN";
-git add cdn;
-git commit -m "Activate CDN packages";
-git push;
 
 # TODO:
 # - Validate CDNX command available

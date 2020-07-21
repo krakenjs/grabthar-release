@@ -10,7 +10,8 @@
     "test": "npm run lint && npm run flow-typed && npm run flow",
     "babel": "babel scripts --ignore=node_modules --out-dir scripts --source-maps inline",
     "prepublish": "in-publish && npm run babel || not-in-publish",
-    "postpublish": "git checkout ./scripts"
+    "postpublish": "git checkout ./scripts",
+    "postinstall": "npm install @paypalcorp/web --registry=https://npm.paypal.com"
   },
   "bin": {
     "grabthar-activate": "./scripts/activate.sh",
@@ -62,6 +63,7 @@
     "fs-extra": "^5.0.0",
     "grumbler-scripts": "^3",
     "node-fetch": "^2.6.0",
-    "npm": "^6.14.0"
+    "npm": "^6.14.0",
+    "shelljs": "^0.8.4"
   }
 }

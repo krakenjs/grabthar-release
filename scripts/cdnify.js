@@ -4,11 +4,13 @@
 /* eslint import/no-commonjs: off */
 
 const { join, extname } = require('path');
+const { userInfo } = require('os');
 
 const fetch = require('node-fetch');
 const { ensureDir, outputFile, exists, existsSync, readFileSync } = require('fs-extra');
 const download = require('download');
 const commandLineArgs = require('command-line-args');
+const shell = require('shelljs');
 
 type Package = {|
     name : string,
@@ -119,7 +121,7 @@ const getLatestVersion = async (name : string) : Promise<string> => {
     return (await info(name))['dist-tags'].latest;
 };
 
-const cdnify = async ({ cdnNamespace, name, version }) => {
+const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
     const infoRes = await fetch(`${ options.registry }/${ name }`);
     const pkgInfo = await infoRes.json();
 
@@ -171,12 +173,12 @@ const cdnify = async ({ cdnNamespace, name, version }) => {
     await outputFile(cdnModuleInfoFile, JSON.stringify(cdnInfo, null, 4));
 };
 
-const cdnifyAll = async (name : string) => {
+const cdnifyGenerate = async (name : string) => {
     const cdnNamespace = options.namespace;
 
     const version = await getLatestVersion(name);
 
-    await cdnify({
+    await cdnifyGenerateModule({
         cdnNamespace,
         name,
         version
@@ -184,7 +186,7 @@ const cdnifyAll = async (name : string) => {
 
     if (options.recursive) {
         await Promise.all(Object.entries(getPackageLock().dependencies).map(async ([ dependencyName, dependency ]) => {
-            await cdnify({
+            await cdnifyGenerateModule({
                 cdnNamespace,
                 name:    dependencyName,
                 // $FlowFixMe
@@ -194,7 +196,76 @@ const cdnifyAll = async (name : string) => {
     }
 };
 
-cdnifyAll(options.module).catch((err) => {
+const exec = (cmd) => {
+    // eslint-disable-next-line no-console
+    console.log(`> ${ cmd }\n`);
+    const result = shell.exec(cmd);
+    if (result.code !== 0) {
+        throw new Error(result.stderr || result.stdout || `Command failed with code ${ result.code }`);
+    }
+    try {
+        return JSON.parse(result.stdout);
+    } catch (err) {
+        return result.stdout;
+    }
+};
+
+const sleep = (time : number) => {
+    return new Promise(resolve => setTimeout(resolve, time));
+};
+
+const cdnifyCommit = async () => {
+    const status = await exec('git status');
+
+    if (status.indexOf('nothing to commit, working tree clean') !== -1) {
+        return;
+    }
+
+    await exec(`git add '${ options.cdnpath }'`);
+    await exec(`git commit -m 'Generate CDN packages'`);
+    await exec('git push');
+};
+
+const cdnifyDeploy = async () => {
+    const { id } = await exec('npx @paypalcorp/web stage --json');
+
+    try {
+        await exec(`npx @paypalcorp/web notify ${ id }`);
+    } catch (err) {
+        // pass
+    }
+
+    const approveRes = await fetch(`https://cdnx-api.qa.paypal.com/assets/approve/${ id }?requestor=svc-xo&approver=${ userInfo().username }`);
+    await approveRes.text();
+
+    await sleep(3 * 1000);
+
+    if (!approveRes.ok) {
+        throw new Error(`Approval failed with status ${ approveRes.status }`);
+    }
+
+    await exec(`npx @paypalcorp/web deploy ${ id }`);
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        await sleep(10 * 1000);
+        try {
+            await exec(`npx @paypalcorp/web status ${ id } --all`);
+        } catch (err) {
+            continue;
+        }
+
+        break;
+    }
+};
+
+const run = async () => {
+    await cdnifyGenerate(options.module);
+    await cdnifyCommit();
+    await cdnifyDeploy();
+};
+
+run().catch((err) => {
     // eslint-disable-next-line no-console
     console.error(err);
     // eslint-disable-next-line no-process-exit
