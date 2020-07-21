@@ -41,8 +41,3 @@ done;
 sleep 5;
 
 $DIR/grabthar-cdnify --cdn="$CDN";
-
-# TODO:
-# - Validate CDNX command available
-# - Trigger CDN release
-# - Automate CDN approval (as much as possible)

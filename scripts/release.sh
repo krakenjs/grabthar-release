@@ -48,8 +48,3 @@ git checkout package-lock.json;
 sleep 5;
 
 $DIR/grabthar-cdnify --recursive --cdn="$CDN";
-
-# TODO:
-# - Validate CDNX command available
-# - Trigger CDN release
-# - Automate CDN approval (as much as possible)
