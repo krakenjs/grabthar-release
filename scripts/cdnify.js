@@ -139,7 +139,9 @@ const cdnify = async ({ cdnNamespace, name, version }) => {
         throw new Error(`NPM info for ${ name }@${ version } has no tarball`);
     }
 
-    const cdnModuleDir = join(options.cdnpath, name);
+    const sanitizedName = name.replace('@', '');
+
+    const cdnModuleDir = join(options.cdnpath, sanitizedName);
     const cdnModuleTarballDir = join(cdnModuleDir, options.tarballfolder);
         
     const cdnModuleInfoFile = join(cdnModuleDir, options.infofile);
@@ -157,7 +159,7 @@ const cdnify = async ({ cdnNamespace, name, version }) => {
         const moduleVersionTarballFile = join(cdnModuleTarballDir, moduleVersionTarballFileName);
 
         if (await exists(moduleVersionTarballFile)) {
-            const relativeTarballDir = join('.', name, options.tarballfolder, moduleVersionTarballFileName);
+            const relativeTarballDir = join(sanitizedName, options.tarballfolder, moduleVersionTarballFileName);
             const cdnTarballUrl = `${ options.cdn }/${ cdnNamespace }/${ relativeTarballDir }`;
 
             // $FlowFixMe
