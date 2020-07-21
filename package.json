@@ -4,7 +4,6 @@
   "description": "Helper scripts for grabthar releases.",
   "main": "index.js",
   "scripts": {
-    "cdnify": "babel-node scripts/cdnify.js --recursive",
     "flow-typed": "rm -rf ./flow-typed && flow-typed install",
     "lint": "eslint scripts/",
     "flow": "flow check",
