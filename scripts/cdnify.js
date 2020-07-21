@@ -42,7 +42,7 @@ type PackageInfo = {|
         |}
     |},
     'dist-tags' : {|
-        latest : string
+        [string] : string
     |}
 |};
 
@@ -60,7 +60,8 @@ const options = commandLineArgs([
     { name: 'nodeops', type: String, defaultValue: join(process.cwd(), '.nodeops') },
     { name: 'cdnapi', type: String, defaultValue: 'https://cdnx-api.qa.paypal.com' },
     { name: 'requester', type: String, defaultValue: 'svc-xo' },
-    { name: 'approver', type: String, defaultValue: userInfo().username }
+    { name: 'approver', type: String, defaultValue: userInfo().username },
+    { name: 'disttag', type: String, defaultValue: 'latest' }
 ]);
 
 const getPackage = () : Package => {
@@ -114,15 +115,15 @@ const info = async (name : string) : Promise<PackageInfo> => {
         throw new Error(`NPM info for ${ name } has no versions`);
     }
 
-    if (!json['dist-tags'] || !json['dist-tags'].latest) {
-        throw new Error(`Latest dist tag not defined`);
+    if (!json['dist-tags'] || !json['dist-tags'][options.disttag]) {
+        throw new Error(`${ options.disttag } dist tag not defined`);
     }
     
     return json;
 };
 
-const getLatestVersion = async (name : string) : Promise<string> => {
-    return (await info(name))['dist-tags'].latest;
+const getDistVersion = async (name : string) : Promise<string> => {
+    return (await info(name))['dist-tags'][options.disttag];
 };
 
 const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
@@ -180,7 +181,7 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
 const cdnifyGenerate = async (name : string) => {
     const cdnNamespace = options.namespace;
 
-    const version = await getLatestVersion(name);
+    const version = await getDistVersion(name);
 
     await cdnifyGenerateModule({
         cdnNamespace,
