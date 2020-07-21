@@ -47,7 +47,7 @@ git checkout package-lock.json;
 
 sleep 5;
 
-npm run grabthar-cdnify --recursive;
+$DIR/grabthar-cdnify --recursive;
 git add cdn;
 git commit -m "Bundle CDN packages";
 git push;

@@ -40,7 +40,7 @@ done;
 
 sleep 5;
 
-npm run grabthar-cdnify;
+$DIR/grabthar-cdnify;
 git add cdn;
 git commit -m "Activate CDN packages";
 git push;
