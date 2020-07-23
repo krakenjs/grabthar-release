@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const PACKAGE_LOCK = path.join(__dirname, '../', 'package-lock.json');
+const PACKAGE_LOCK = path.join(process.cwd(), 'package-lock.json');
 
 // eslint-disable-next-line no-sync
 if (!fs.existsSync(PACKAGE_LOCK)) {
