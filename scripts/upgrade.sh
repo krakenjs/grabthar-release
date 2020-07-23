@@ -27,10 +27,6 @@ if [ ! -f ./package-lock.json ]; then
     exit 1;
 fi
 
-rm -rf ./node_modules;
-rm -f ./package-lock.json;
-
-npm install --production;
 node $DIR/grabthar-prune;
 
 git add package.json;
@@ -43,10 +39,3 @@ else
 fi;
 
 git push;
-
-rm -rf ./node_modules;
-rm -f ./package-lock.json;
-
-npm install;
-
-git checkout package-lock.json;
