@@ -12,6 +12,7 @@ import download from 'download';
 import commandLineArgs from 'command-line-args';
 import shell from 'shelljs';
 import { prompt } from 'inquirer';
+import HttpsProxyAgent from 'https-proxy-agent';
 
 type Package = {|
     name : string,
@@ -61,7 +62,8 @@ const options = commandLineArgs([
     { name: 'cdnapi', type: String, defaultValue: 'https://cdnx-api.qa.paypal.com' },
     { name: 'requester', type: String, defaultValue: 'svc-xo' },
     { name: 'approver', type: String, defaultValue: userInfo().username },
-    { name: 'disttag', type: String, defaultValue: 'latest' }
+    { name: 'disttag', type: String, defaultValue: 'latest' },
+    { name: 'npmproxy', type: String, defaultValue: 'http://proxy.prd.plb.paypalcorp.com:8080' }
 ]);
 
 const getPackage = () : Package => {
@@ -96,6 +98,16 @@ if (!options.namespace) {
     throw new Error(`Namespace required`);
 }
 
+const npmFetch = (url) => {
+    const opts = {};
+
+    if (options.npmproxy) {
+        opts.agent = new HttpsProxyAgent(options.npmproxy);
+    }
+    
+    return fetch(url, opts);
+};
+
 const infoCache = {};
 
 const info = async (name : string) : Promise<PackageInfo> => {
@@ -103,7 +115,7 @@ const info = async (name : string) : Promise<PackageInfo> => {
         return await infoCache[name];
     }
 
-    const infoResPromise = infoCache[name] = fetch(`${ options.registry }/${ name }`);
+    const infoResPromise = infoCache[name] = npmFetch(`${ options.registry }/${ name }`);
     const infoRes = await infoResPromise;
     const json = await infoRes.json();
 
@@ -127,7 +139,7 @@ const getDistVersion = async (name : string) : Promise<string> => {
 };
 
 const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
-    const infoRes = await fetch(`${ options.registry }/${ name }`);
+    const infoRes = await npmFetch(`${ options.registry }/${ name }`);
     const pkgInfo = await infoRes.json();
 
     if (!version) {
