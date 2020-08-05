@@ -49,7 +49,7 @@ type PackageInfo = {|
 
 const options = commandLineArgs([
     { name: 'module', type: String, defaultOption: true },
-    { name: 'registry', type: String, defaultValue: 'http://registry.npmjs.org' },
+    { name: 'registry', type: String, defaultValue: 'https://registry.npmjs.org' },
     { name: 'cdn', type: String, defaultValue: 'https://www.mycdn.com' },
     { name: 'namespace', type: String },
     { name: 'infofile', type: String, defaultValue: 'info.json' },
