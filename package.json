@@ -11,7 +11,7 @@
     "babel": "babel scripts --ignore=node_modules --out-dir scripts --source-maps inline",
     "prepublish": "in-publish && npm run babel || not-in-publish",
     "postpublish": "git checkout ./scripts",
-    "postinstall": "npm install @paypalcorp/web --registry=https://npm.paypal.com || echo 'Unable to install cdnx cli tools'"
+    "postinstall": "npm install @paypalcorp/web --registry=https://npm.paypal.com --proxy=https://npm.paypal.com || echo 'Unable to install cdnx cli tools'"
   },
   "bin": {
     "grabthar-activate": "./scripts/activate.sh",
