@@ -5,6 +5,7 @@
 
 import { join, extname } from 'path';
 import { userInfo } from 'os';
+import { lookup } from 'dns';
 
 import fetch from 'node-fetch';
 import { ensureDir, outputFile, exists, existsSync, readFileSync } from 'fs-extra';
@@ -63,7 +64,7 @@ const options = commandLineArgs([
     { name: 'requester', type: String, defaultValue: 'svc-xo' },
     { name: 'approver', type: String, defaultValue: userInfo().username },
     { name: 'disttag', type: String, defaultValue: 'latest' },
-    { name: 'npmproxy', type: String, defaultValue: 'http://proxy.prd.plb.paypalcorp.com:8080' }
+    { name: 'npmproxy', type: String, defaultValue: '' }
 ]);
 
 const getPackage = () : Package => {
@@ -98,15 +99,52 @@ if (!options.namespace) {
     throw new Error(`Namespace required`);
 }
 
-const npmFetch = (url) => {
+const getHost = (url) => {
+    return new URL(url).host;
+};
+
+const dns = async (host) => {
+    return await new Promise((resolve, reject) => {
+        lookup(host, { family: 6 }, (err, address) => {
+            return err ? reject(err) : resolve(address);
+        });
+    });
+};
+
+const npmFetch = async (url) => {
     const opts = {};
+
+    const host = getHost(url);
+    const ip = await dns(host);
+    url = url.replace(host, `[${ ip }]`);
+
+    opts.headers = opts.headers || {};
+    opts.headers.host = host;
 
     if (options.npmproxy) {
         opts.agent = new HttpsProxyAgent(options.npmproxy);
     }
     
-    return fetch(url, opts);
+    return await fetch(url, opts);
 };
+
+const npmDownload = async (url, dir, filename) => {
+    const opts = {};
+
+    const host = getHost(url);
+    const ip = await dns(host);
+    url = url.replace(host, `[${ ip }]`);
+
+    opts.headers = opts.headers || {};
+    opts.headers.host = host;
+
+    if (options.npmproxy) {
+        opts.agent = new HttpsProxyAgent(options.npmproxy);
+    }
+    
+    await download(url, dir, { filename, headers: { host } });
+};
+
 
 const infoCache = {};
 
@@ -169,7 +207,7 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
     await ensureDir(cdnModuleDir);
     await ensureDir(cdnModuleTarballDir);
 
-    await download(tarball, cdnModuleTarballDir, { filename: cdnModuleTarballFileName });
+    await npmDownload(tarball, cdnModuleTarballDir, cdnModuleTarballFileName);
 
     const cdnInfo = JSON.parse(JSON.stringify(pkgInfo));
 
