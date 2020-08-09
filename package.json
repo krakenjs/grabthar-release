@@ -9,7 +9,7 @@
     "flow": "flow check",
     "test": "npm run lint && npm run flow-typed && npm run flow",
     "babel": "babel scripts --ignore=node_modules --out-dir scripts --source-maps inline",
-    "prepublish": "in-publish && npm run babel || not-in-publish",
+    "prepublishOnly": "npm run babel",
     "postpublish": "git checkout ./scripts",
     "postinstall": "npm install @paypalcorp/web --registry=https://npm.paypal.com --proxy='null' --https-proxy='null' || echo 'Unable to install cdnx cli tools'"
   },
