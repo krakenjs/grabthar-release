@@ -7,6 +7,7 @@ import { join, extname } from 'path';
 import { userInfo } from 'os';
 import { lookup } from 'dns';
 
+import config from 'libnpmconfig';
 import fetch from 'node-fetch';
 import { ensureDir, outputFile, exists, existsSync, readFileSync } from 'fs-extra';
 import download from 'download';
@@ -60,6 +61,8 @@ const booleanEnv = (val, def = false) => {
     return def;
 };
 
+const conf = config.read();
+
 const options = commandLineArgs([
     { name: 'module', type: String, defaultOption: true },
 
@@ -77,7 +80,7 @@ const options = commandLineArgs([
     { name: 'requester',     type: String,  defaultValue: process.env.REQUESTER      || 'svc-xo' },
     { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
     { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
-    { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || '' },
+    { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
     { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) }
 ]);
 

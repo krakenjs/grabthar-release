@@ -65,6 +65,7 @@
     "grumbler-scripts": "^3",
     "https-proxy-agent": "^5.0.0",
     "inquirer": "^7.3.2",
+    "libnpmconfig": "^1.2.1",
     "node-fetch": "^2.6.0",
     "npm": "^6.14.0",
     "shelljs": "^0.8.4"
