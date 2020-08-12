@@ -149,6 +149,8 @@ const npmFetch = async (url) => {
         opts.agent = new HttpsProxyAgent(options.npmproxy);
     }
     
+    // eslint-disable-next-line no-console
+    console.info('GET', url);
     return await fetch(url, opts);
 };
 
@@ -166,6 +168,8 @@ const npmDownload = async (url, dir, filename) => {
         opts.agent = new HttpsProxyAgent(options.npmproxy);
     }
     
+    // eslint-disable-next-line no-console
+    console.info('SYNC', url);
     await download(url, dir, { filename, headers: { host } });
 };
 
