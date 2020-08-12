@@ -3,7 +3,7 @@
 set -e;
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-$DIR/grabthar-validate;
+$DIR/grabthar-validate-git;
 
 npm run validate-flat;
 
@@ -26,7 +26,7 @@ cat << EOF | node
     let pkgLock = require(PACKAGE_LOCK);
 
     let flattenedDependencies = {};
-    
+
     for (let depName of Object.keys(pkgLock.dependencies)) {
         let dep = pkgLock.dependencies[depName];
 

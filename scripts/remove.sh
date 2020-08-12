@@ -3,7 +3,7 @@
 set -e;
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-$DIR/grabthar-validate;
+$DIR/grabthar-validate-git;
 
 if [ -z "$1" ]; then
     echo "Please provide a module name to remove";
