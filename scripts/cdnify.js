@@ -158,8 +158,11 @@ const npmDownload = async (url, dir, filename) => {
     const opts = {};
 
     const host = getHost(url);
-    const ip = await dns(host);
-    url = url.replace(host, `[${ ip }]`);
+    
+    if (opts.ipv6) {
+        const ip = await dns(host);
+        url = url.replace(host, `[${ ip }]`);
+    }
 
     opts.headers = opts.headers || {};
     opts.headers.host = host;
