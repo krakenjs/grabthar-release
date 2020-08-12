@@ -166,6 +166,7 @@ const npmDownload = async (url, dir, filename) => {
 
     opts.headers = opts.headers || {};
     opts.headers.host = host;
+    opts.filename = filename;
 
     if (options.npmproxy) {
         opts.agent = new HttpsProxyAgent(options.npmproxy);
@@ -173,7 +174,7 @@ const npmDownload = async (url, dir, filename) => {
     
     // eslint-disable-next-line no-console
     console.info('SYNC', url);
-    await download(url, dir, { filename, headers: { host } });
+    await download(url, dir, opts);
 };
 
 
