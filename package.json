@@ -22,7 +22,8 @@
     "grabthar-release": "./scripts/release.sh",
     "grabthar-remove": "./scripts/remove.sh",
     "grabthar-upgrade": "./scripts/upgrade.sh",
-    "grabthar-validate": "./scripts/validate.sh"
+    "grabthar-validate-git": "./scripts/validate-git.sh",
+    "grabthar-validate-npm": "./scripts/validate-npm.sh"
   },
   "files": [
     "scripts"
