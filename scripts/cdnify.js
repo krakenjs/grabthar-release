@@ -64,7 +64,8 @@ const options = commandLineArgs([
     { name: 'requester', type: String, defaultValue: 'svc-xo' },
     { name: 'approver', type: String, defaultValue: userInfo().username },
     { name: 'disttag', type: String, defaultValue: 'latest' },
-    { name: 'npmproxy', type: String, defaultValue: '' }
+    { name: 'npmproxy', type: String, defaultValue: '' },
+    { name: 'ipv6', type: Boolean, defaultValue: false }
 ]);
 
 const getPackage = () : Package => {
@@ -103,9 +104,9 @@ const getHost = (url) => {
     return new URL(url).host;
 };
 
-const dns = async (host) => {
+const dns = async (host, family = 6) => {
     return await new Promise((resolve, reject) => {
-        lookup(host, { family: 6 }, (err, address) => {
+        lookup(host, { family }, (err, address) => {
             return err ? reject(err) : resolve(address);
         });
     });
@@ -115,8 +116,11 @@ const npmFetch = async (url) => {
     const opts = {};
 
     const host = getHost(url);
-    const ip = await dns(host);
-    url = url.replace(host, `[${ ip }]`);
+
+    if (opts.ipv6) {
+        const ip = await dns(host);
+        url = url.replace(host, `[${ ip }]`);
+    }
 
     opts.headers = opts.headers || {};
     opts.headers.host = host;
