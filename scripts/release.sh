@@ -21,4 +21,4 @@ git checkout package-lock.json;
 
 sleep 5;
 
-$DIR/grabthar-cdnify --recursive --cdn="$CDN" --disttag="$DIST_TAG";
+$DIR/grabthar-cdnify --recursive

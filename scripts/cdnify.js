@@ -48,24 +48,37 @@ type PackageInfo = {|
     |}
 |};
 
+const booleanEnv = (val, def = false) => {
+    if (val === '0' || val === 'false' || val === 'off') {
+        return false;
+    }
+
+    if (val) {
+        return true;
+    }
+
+    return def;
+};
+
 const options = commandLineArgs([
     { name: 'module', type: String, defaultOption: true },
-    { name: 'registry', type: String, defaultValue: 'https://registry.npmjs.org' },
-    { name: 'cdn', type: String, defaultValue: 'https://www.mycdn.com' },
-    { name: 'namespace', type: String },
-    { name: 'infofile', type: String, defaultValue: 'info.json' },
-    { name: 'tarballfolder', type: String, defaultValue: 'tarballs' },
-    { name: 'cdnpath', type: String, defaultValue: join(process.cwd(), 'cdn') },
-    { name: 'recursive', type: Boolean, defaultValue: false },
-    { name: 'package', type: String, defaultValue: join(process.cwd(), 'package.json') },
-    { name: 'packagelock', type: String, defaultValue: join(process.cwd(), 'package-lock.json') },
-    { name: 'nodeops', type: String, defaultValue: join(process.cwd(), '.nodeops') },
-    { name: 'cdnapi', type: String, defaultValue: 'https://cdnx-api.qa.paypal.com' },
-    { name: 'requester', type: String, defaultValue: 'svc-xo' },
-    { name: 'approver', type: String, defaultValue: userInfo().username },
-    { name: 'disttag', type: String, defaultValue: 'latest' },
-    { name: 'npmproxy', type: String, defaultValue: '' },
-    { name: 'ipv6', type: Boolean, defaultValue: false }
+
+    { name: 'cdn',           type: String,  defaultValue: process.env.CDN            || '' },
+    { name: 'registry',      type: String,  defaultValue: process.env.REGISTRY       || 'https://registry.npmjs.org' },
+    { name: 'namespace',     type: String,  defaultValue: process.env.NAMESPACE      || '' },
+    { name: 'infofile',      type: String,  defaultValue: process.env.INFO_FILE      || 'info.json' },
+    { name: 'tarballfolder', type: String,  defaultValue: process.env.TARBALL_FOLDER || 'tarballs' },
+    { name: 'cdnpath',       type: String,  defaultValue: process.env.CDN_PATH       || join(process.cwd(), 'cdn') },
+    { name: 'recursive',     type: Boolean, defaultValue: booleanEnv(process.env.RECURSIVE) },
+    { name: 'package',       type: String,  defaultValue: process.env.PACKAGE        || join(process.cwd(), 'package.json') },
+    { name: 'packagelock',   type: String,  defaultValue: process.env.PACKAGE_LOCK   || join(process.cwd(), 'package-lock.json') },
+    { name: 'nodeops',       type: String,  defaultValue: process.env.NODE_OPS       || join(process.cwd(), '.nodeops') },
+    { name: 'cdnapi',        type: String,  defaultValue: process.env.CDNAPI         || 'https://cdnx-api.qa.paypal.com' },
+    { name: 'requester',     type: String,  defaultValue: process.env.REQUESTER      || 'svc-xo' },
+    { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
+    { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
+    { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || '' },
+    { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) }
 ]);
 
 const getPackage = () : Package => {
@@ -98,6 +111,10 @@ if (!options.module) {
 
 if (!options.namespace) {
     throw new Error(`Namespace required`);
+}
+
+if (!options.cdn) {
+    throw new Error(`CDN required`);
 }
 
 const getHost = (url) => {

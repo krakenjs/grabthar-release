@@ -42,4 +42,4 @@ done;
 
 sleep 5;
 
-$DIR/grabthar-cdnify --cdn="$CDN";
+$DIR/grabthar-cdnify
