@@ -12,9 +12,9 @@ import fetch from 'node-fetch';
 import { ensureDir, outputFile, exists, existsSync, readFileSync } from 'fs-extra';
 import download from 'download';
 import commandLineArgs from 'command-line-args';
-import shell from 'shelljs';
 import { prompt } from 'inquirer';
 import HttpsProxyAgent from 'https-proxy-agent';
+import shell from 'shelljs';
 
 type Package = {|
     name : string,
@@ -283,13 +283,23 @@ const cdnifyGenerate = async (name : string) => {
     }
 };
 
-const exec = async (cmd) => {
+const exec = async <T>(cmd : string, envVars? : {| [string] : string |}) : Promise<T> => {
+    const env = envVars || {};
+
+    const cmdString = `> ${ Object.keys(env).map(key => `${ key }=${ env[key] }`).join(' ') } ${ cmd }\n`;
+
     // eslint-disable-next-line no-console
-    console.log(`> ${ cmd }\n`);
+    console.log(cmdString);
+
+    for (const key of Object.keys(env)) {
+        shell.env[key] = env[key];
+    }
+
     const result = await shell.exec(cmd);
     if (result.code !== 0) {
         throw new Error(result.stderr || result.stdout || `Command failed with code ${ result.code }`);
     }
+
     try {
         return JSON.parse(result.stdout);
     } catch (err) {
@@ -331,7 +341,11 @@ const getYesNo = async (message) => {
 };
 
 const web = async (cmd) => {
-    return await exec(`JENKINS_HOME=1 SVC_ACC_USERNAME=${ options.requester } SVC_ACC_PASSWORD=${ await getPassword(options.requester) } npx @paypalcorp/web ${ cmd }`);
+    return await exec(`npx @paypalcorp/web ${ cmd }`, {
+        JENKINS_HOME:     '1',
+        SVC_ACC_USERNAME: options.requester,
+        SVC_ACC_PASSWORD: await getPassword(options.requester)
+    });
 };
 
 const sleep = (time : number) => {

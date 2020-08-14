@@ -36,7 +36,7 @@
     "engine-strict": true
   },
   "browserslist": [
-    "IE >= 9",
+    "IE >= 11",
     "chrome >= 27",
     "firefox >= 30",
     "safari >= 5",
@@ -60,7 +60,7 @@
     "check-node-version": "^4.0.3",
     "command-line-args": "^5.1.1",
     "download": "^8.0.0",
-    "flow-bin": "^0.85.0",
+    "flow-bin": "^0.131.0",
     "fs-extra": "^5.0.0",
     "grumbler-scripts": "^3",
     "https-proxy-agent": "^5.0.0",
