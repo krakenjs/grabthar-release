@@ -10,8 +10,7 @@
     "test": "npm run lint && npm run flow-typed && npm run flow",
     "babel": "babel scripts --ignore=node_modules --out-dir scripts --source-maps inline",
     "prepublishOnly": "npm run babel",
-    "postpublish": "git checkout ./scripts",
-    "postinstall": "npm install @paypalcorp/web --registry=https://npm.paypal.com --proxy='null' --https-proxy='null' || echo 'Unable to install cdnx cli tools'"
+    "postpublish": "git checkout ./scripts"
   },
   "bin": {
     "grabthar-activate": "./scripts/activate.sh",
