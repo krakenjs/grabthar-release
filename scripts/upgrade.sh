@@ -8,12 +8,7 @@ $DIR/grabthar-validate-git;
 if [ -z "$1" ]; then
     npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade
 else
-    if ! npm ls "$1"; then
-        npm install --only=production --production --save --save-exact "$1"
-        node $DIR/grabthar-prune;
-    else
-        npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade --filter="$1"
-    fi;
+    npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade --filter="$1"
 fi;
 
 rm -rf ./node_modules;
