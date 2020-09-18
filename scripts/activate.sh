@@ -22,6 +22,8 @@ local_version=$(node --eval "
     console.log(pkg.version);
 ")
 
+npm_public_registry_version_latest_tag=$(npm view $module version latest);
+
 if [ -z "$version" ]; then
     version=$(npm view $module version);
 fi;
@@ -46,6 +48,6 @@ fi;
 #     npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
 # done;
 
-sleep 5;
+# sleep 5;
 
 # $DIR/grabthar-cdnify
