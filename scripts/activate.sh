@@ -4,7 +4,7 @@ set -e;
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 # $DIR/grabthar-validate-git;
-$DIR/grabthar-validate-npm;
+# $DIR/grabthar-validate-npm;
 
 version="$1";
 tag="active";
@@ -14,6 +14,12 @@ module=$(node --eval "
     const PACKAGE = './package.json';
     let pkg = require(PACKAGE);
     console.log(pkg.name);
+")
+
+local_version=$(node --eval "
+    const PACKAGE = './package.json';
+    let pkg = require(PACKAGE);
+    console.log(pkg.version);
 ")
 
 if [ -z "$version" ]; then
