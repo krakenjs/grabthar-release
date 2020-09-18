@@ -67,6 +67,4 @@ fi;
 #     npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
 # done;
 
-# sleep 5;
-
 # $DIR/grabthar-cdnify
