@@ -24,6 +24,25 @@ local_version=$(node --eval "
 
 npm_public_registry_version_latest_tag=$(npm view $module version latest);
 
+while [ "$npm_public_registry_version_latest_tag" != "$local_version" ]
+do
+  echo "npm version: $npm_public_registry_version_latest_tag"
+  echo "local version: $local_version"
+  echo "Version mismatch. Trying again in 5 seconds...\n"
+  sleep 5;
+  npm_public_registry_version_latest_tag=$(npm view $module version latest);
+  # the following local_version is just for testing purposes and should be removed from production code
+  local_version=$(node --eval "
+    const PACKAGE = './package.json';
+    let pkg = require(PACKAGE);
+    console.log(pkg.version);
+")
+done
+
+echo "npm version: $npm_public_registry_version_latest_tag"
+echo "local version: $local_version"
+echo "Successful version match."
+
 if [ -z "$version" ]; then
     version=$(npm view $module version);
 fi;
