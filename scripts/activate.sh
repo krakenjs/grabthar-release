@@ -41,5 +41,4 @@ for env in $envs; do
     $DIR/grabthar-verify-npm-publish "$version" "$tag-$env";
 done;
 
-
 $DIR/grabthar-cdnify
