@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$1" ] || [ -z "$2" ]; then
-    echo "Invalid arguments. Expected version and dist-tag."
+    echo "Invalid arguments. Expected <version> and <dist-tag>."
     exit 1;
 fi
 
