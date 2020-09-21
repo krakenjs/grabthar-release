@@ -3,8 +3,8 @@
 set -e;
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-# $DIR/grabthar-validate-git;
-# $DIR/grabthar-validate-npm;
+$DIR/grabthar-validate-git;
+$DIR/grabthar-validate-npm;
 
 version="$1";
 tag="active";
@@ -33,11 +33,11 @@ else
     done;
 fi;
 
-# read -p "NPM 2FA Code: " twofactorcode
+read -p "NPM 2FA Code: " twofactorcode
 
-# for env in $envs; do
-#     echo npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
-#     npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
-# done;
+for env in $envs; do
+    echo npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
+    npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
+done;
 
-# $DIR/grabthar-cdnify
+$DIR/grabthar-cdnify

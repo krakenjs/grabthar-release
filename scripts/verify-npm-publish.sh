@@ -26,4 +26,5 @@ do
     sleep 5;
     npm_public_registry_version=$(npm view $package_name version $dist_tag);
 done
+
 echo "Successful version match."
