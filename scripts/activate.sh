@@ -40,6 +40,8 @@ for env in $envs; do
     npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
 done;
 
-sleep 5;
+for env in $envs; do
+    $DIR/grabthar-verify-npm-publish "$version" "$tag-$env";
+done;
 
 $DIR/grabthar-cdnify

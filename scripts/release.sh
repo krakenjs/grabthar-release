@@ -19,6 +19,12 @@ npm publish --tag $DIST_TAG;
 git checkout package.json;
 git checkout package-lock.json;
 
-sleep 5;
+local_version=$(node --eval "
+    const PACKAGE = './package.json';
+    let pkg = require(PACKAGE);
+    console.log(pkg.version);
+")
+
+$DIR/grabthar-verify-npm-publish $local_version $DIST_TAG
 
 $DIR/grabthar-cdnify --recursive
