@@ -19,6 +19,6 @@ npm publish --tag $DIST_TAG;
 git checkout package.json;
 git checkout package-lock.json;
 
-sleep 5;
+$DIR/grabthar-verify-npm-publish $DIST_TAG
 
 $DIR/grabthar-cdnify --recursive
