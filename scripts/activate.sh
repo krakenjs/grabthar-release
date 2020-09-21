@@ -38,6 +38,9 @@ read -p "NPM 2FA Code: " twofactorcode
 for env in $envs; do
     echo npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
     npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
+done;
+
+for env in $envs; do
     $DIR/grabthar-verify-npm-publish "$version" "$tag-$env";
 done;
 
