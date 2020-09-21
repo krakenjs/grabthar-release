@@ -1,4 +1,4 @@
-module=$(node --eval "
+package_name=$(node --eval "
     const PACKAGE = './package.json';
     let pkg = require(PACKAGE);
     console.log(pkg.name);
