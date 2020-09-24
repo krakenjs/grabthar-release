@@ -14,16 +14,19 @@ package_name=$(node --eval "
     console.log(pkg.name);
 ")
 
-npm_public_registry_version=$(npm view "$package_name" version "$dist_tag");
-
 echo "package name: $package_name"
 echo "dist tag: $dist_tag"
 echo "local version: $local_version"
-echo "npm version: $npm_public_registry_version"
+echo "Comparing local version to public registry version..."
 
 interval=5
 max_time=300
 counter=0
+
+sleep $interval;
+
+npm_public_registry_version=$(npm view "$package_name" version "$dist_tag");
+echo "npm version: $npm_public_registry_version"
 
 while [ "$local_version" != "$npm_public_registry_version" ]
 do
