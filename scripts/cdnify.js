@@ -148,7 +148,7 @@ const npmFetch = async (url) => {
     if (options.npmproxy) {
         opts.agent = new HttpsProxyAgent(options.npmproxy);
     }
-    
+
     // eslint-disable-next-line no-console
     console.info('GET', url);
     return await fetch(url, opts);
@@ -158,7 +158,7 @@ const npmDownload = async (url, dir, filename) => {
     const opts = {};
 
     const host = getHost(url);
-    
+
     if (opts.ipv6) {
         const ip = await dns(host);
         url = url.replace(host, `[${ ip }]`);
@@ -171,7 +171,7 @@ const npmDownload = async (url, dir, filename) => {
     if (options.npmproxy) {
         opts.agent = new HttpsProxyAgent(options.npmproxy);
     }
-    
+
     // eslint-disable-next-line no-console
     console.info('SYNC', url);
     await download(url, dir, opts);
@@ -200,7 +200,14 @@ const info = async (name : string) : Promise<PackageInfo> => {
     if (!json['dist-tags'] || !json['dist-tags'][options.disttag]) {
         throw new Error(`${ options.disttag } dist tag not defined`);
     }
-    
+
+    const localPackage = await getPackage();
+    const publicRegistryVersion = json['dist-tags'][options.disttag];
+
+    if (localPackage.version !== publicRegistryVersion) {
+        throw new Error(`Version mismatch between local package.json (${localPackage.version}) and public npm registry (${ publicRegistryVersion }).`);
+    }
+
     return json;
 };
 
@@ -232,7 +239,7 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
 
     const cdnModuleDir = join(options.cdnpath, sanitizedName);
     const cdnModuleTarballDir = join(cdnModuleDir, options.tarballfolder);
-        
+
     const cdnModuleInfoFile = join(cdnModuleDir, options.infofile);
     const cdnModuleTarballFileName = `${ version }${ extname(tarball) }`;
 
