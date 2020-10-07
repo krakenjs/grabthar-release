@@ -204,8 +204,8 @@ const info = async (name : string) : Promise<PackageInfo> => {
     const localPackage = await getPackage();
     const publicRegistryVersion = json['dist-tags'][options.disttag];
 
-    if (localPackage.version !== publicRegistryVersion) {
-        throw new Error(`Version mismatch between local package.json (${localPackage.version}) and public npm registry (${ publicRegistryVersion }).`);
+    if (options.disttag === 'latest' && localPackage.version !== publicRegistryVersion) {
+        throw new Error(`Version mismatch between local package.json (${ localPackage.version }) and public npm registry (${ publicRegistryVersion }).`);
     }
 
     return json;
