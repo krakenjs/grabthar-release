@@ -19,7 +19,7 @@ cat << EOF | node
     }
 
     if (!fs.existsSync(PACKAGE_LOCK)) {
-        throw new Error('Expected package-lock.json to be present');
+        process.exit(0);
     }
 
     let pkg = require(PACKAGE);
