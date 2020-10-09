@@ -5,7 +5,7 @@ set -e;
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 $DIR/grabthar-validate-git;
 
-npm run validate-flat;
+$DIR/grabthar-validate-flat;
 
 cat << EOF | node
 
