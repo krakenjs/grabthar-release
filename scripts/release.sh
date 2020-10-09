@@ -14,7 +14,7 @@ npm version patch;
 
 git push;
 git push --tags;
-npm run flatten;
+$DIR/grabthar-flatten;
 npm publish --tag $DIST_TAG;
 git checkout package.json;
 git checkout package-lock.json;

@@ -24,6 +24,7 @@
     "grabthar-upgrade": "./scripts/upgrade.sh",
     "grabthar-validate-git": "./scripts/validate-git.sh",
     "grabthar-validate-npm": "./scripts/validate-npm.sh",
+    "grabthar-validate-flat": "./scripts/validate-flat.js",
     "grabthar-verify-npm-publish": "./scripts/verify-npm-publish.sh"
   },
   "files": [

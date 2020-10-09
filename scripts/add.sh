@@ -9,5 +9,5 @@ if [ -z "$1" ]; then
     echo 'Must specify module to add';
     exit 1;
 else
-    npm run upgrade "$1";
+    $DIR/grathar-upgrade "$1";
 fi;
