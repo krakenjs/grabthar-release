@@ -17,7 +17,7 @@ git push --tags;
 $DIR/grabthar-flatten;
 npm publish --tag $DIST_TAG;
 git checkout package.json;
-git checkout package-lock.json;
+git checkout package-lock.json || echo 'Package lock not found';
 
 local_version=$(node --eval "
     const PACKAGE = './package.json';
