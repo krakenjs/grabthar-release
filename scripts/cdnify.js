@@ -49,18 +49,6 @@ type PackageInfo = {|
     |}
 |};
 
-const booleanEnv = (val, def = false) => {
-    if (val === '0' || val === 'false' || val === 'off') {
-        return false;
-    }
-
-    if (val) {
-        return true;
-    }
-
-    return def;
-};
-
 const conf = config.read();
 
 const options = commandLineArgs([
@@ -72,7 +60,6 @@ const options = commandLineArgs([
     { name: 'infofile',      type: String,  defaultValue: process.env.INFO_FILE      || 'info.json' },
     { name: 'tarballfolder', type: String,  defaultValue: process.env.TARBALL_FOLDER || 'tarballs' },
     { name: 'cdnpath',       type: String,  defaultValue: process.env.CDN_PATH       || join(process.cwd(), 'cdn') },
-    { name: 'recursive',     type: Boolean, defaultValue: booleanEnv(process.env.RECURSIVE) },
     { name: 'package',       type: String,  defaultValue: process.env.PACKAGE        || join(process.cwd(), 'package.json') },
     { name: 'packagelock',   type: String,  defaultValue: process.env.PACKAGE_LOCK   || join(process.cwd(), 'package-lock.json') },
     { name: 'nodeops',       type: String,  defaultValue: process.env.NODE_OPS       || join(process.cwd(), '.nodeops') },
@@ -81,8 +68,9 @@ const options = commandLineArgs([
     { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
     { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
     { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
-    { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) },
-    { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) }
+    { name: 'recursive',     type: Boolean, defaultValue: false },
+    { name: 'ipv6',          type: Boolean, defaultValue: false },
+    { name: 'deployonly',    type: Boolean, defaultValue: false }
 ]);
 
 const getPackage = () : Package => {
