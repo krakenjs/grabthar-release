@@ -81,7 +81,8 @@ const options = commandLineArgs([
     { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
     { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
     { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
-    { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) }
+    { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) },
+    { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) }
 ]);
 
 const getPackage = () : Package => {
@@ -398,6 +399,10 @@ const cdnifyDeploy = async () => {
 };
 
 const run = async () => {
+    if (options.deployonly) {
+        return await cdnifyDeploy();
+    }
+
     await cdnifyGenerate(options.module);
 
     if (!await getYesNo('Commit and deploy?')) {
