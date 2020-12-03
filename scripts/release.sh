@@ -26,5 +26,3 @@ local_version=$(node --eval "
 ")
 
 $DIR/grabthar-verify-npm-publish $local_version $DIST_TAG
-
-$DIR/grabthar-cdnify
