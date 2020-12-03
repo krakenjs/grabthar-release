@@ -10,7 +10,7 @@ if [ -z "$DIST_TAG" ]; then
     DIST_TAG="latest";
 fi;
 
-npm version patch;
+npm version ${1-patch};
 
 git push;
 git push --tags;
