@@ -387,7 +387,11 @@ const cdnifyDeploy = async () => {
     await sleep(3 * 1000);
 
     if (!approveRes.ok) {
-        throw new Error(`Approval failed with status ${ approveRes.status }`);
+        // eslint-disable-next-line no-console
+        console.warn(`Approval failed with status ${ approveRes.status }`);
+        if (!await getYesNo(`Approval failed with status ${ approveRes.status }. Please try to approve manually.\n\nContinue with release?`)) {
+            throw new Error(`Aborted deploy`);
+        }
     }
 
     await await web(`deploy ${ id }`);
