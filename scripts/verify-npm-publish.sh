@@ -35,7 +35,7 @@ do
     fi
     echo "Version mismatch between local version $local_version and npm version $npm_public_registry_version. Trying again in $interval seconds..."
     sleep $interval;
-    npm_public_registry_version=$(npm view "$package_name" version "$dist_tag");
+    npm_public_registry_version=$(npm view "$package_name" "dist-tags.$dist_tag");
     counter=$(( counter + interval ));
 done
 
