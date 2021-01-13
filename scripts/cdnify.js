@@ -78,6 +78,7 @@ const options = commandLineArgs([
     { name: 'nodeops',       type: String,  defaultValue: process.env.NODE_OPS       || join(process.cwd(), '.nodeops') },
     { name: 'cdnapi',        type: String,  defaultValue: process.env.CDNAPI         || 'https://cdnx-api.qa.paypal.com' },
     { name: 'requester',     type: String,  defaultValue: process.env.REQUESTER      || 'svc-xo' },
+    { name: 'password',      type: String,  defaultValue: process.env.SVC_PASSWORD },
     { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
     { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
     { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
@@ -352,7 +353,7 @@ const web = async (cmd) => {
     return await exec(`npx @paypalcorp/web ${ cmd }`, {
         JENKINS_HOME:     '1',
         SVC_ACC_USERNAME: options.requester,
-        SVC_ACC_PASSWORD: await getPassword(options.requester)
+        SVC_ACC_PASSWORD: options.password || await getPassword(options.requester)
     });
 };
 
