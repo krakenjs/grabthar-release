@@ -390,7 +390,7 @@ const cdnifyDeploy = async () => {
     if (!approveRes.ok) {
         // eslint-disable-next-line no-console
         console.warn(`Approval failed with status ${ approveRes.status }`);
-        if (!await getYesNo(`Approval failed with status ${ approveRes.status }. Please try to approve manually.\n\nContinue with release?`)) {
+        if (!await getYesNo(`Approval failed with status ${ approveRes.status }. Please try to approve manually.\n\nhttps://cdnx-ui.qa.paypal.com/approve/${ id }\n\nContinue with release?`)) {
             throw new Error(`Aborted deploy`);
         }
     }
