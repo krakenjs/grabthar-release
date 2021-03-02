@@ -207,7 +207,7 @@ const getDistVersions = async (name : string) : Promise<$ReadOnlyArray<string>> 
     return [ ...new Set(versions) ];
 };
 
-const cdnifyGenerateModule = async ({ cdnNamespace, name, version } : {| cdnNamespace : string, name : string, version : string |}) => {
+const cdnifyGenerateModule = async ({ cdnNamespace, name, version, prune = true } : {| cdnNamespace : string, name : string, version : string, prune? : boolean |}) => {
     const infoRes = await npmFetch(`${ options.registry }/${ name }`);
     const pkgInfo = await infoRes.json();
 
@@ -244,17 +244,19 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version } : {| cdnName
 
     const activeVersions = new Set(Object.values(cdnInfo['dist-tags']));
 
-    for (const existingVersion of Object.keys(cdnInfo.versions)) {
-        if (!activeVersions.has(existingVersion)) {
-            const versionConfig = cdnInfo.versions[existingVersion];
-            const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
+    if (prune) {
+        for (const existingVersion of Object.keys(cdnInfo.versions)) {
+            if (!activeVersions.has(existingVersion)) {
+                const versionConfig = cdnInfo.versions[existingVersion];
+                const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
 
-            if (await exists(existingVersionTarballPath)) {
-                console.info('Cleaning up', existingVersionTarballPath);
-                await remove(existingVersionTarballPath);
+                if (await exists(existingVersionTarballPath)) {
+                    console.info('Cleaning up', existingVersionTarballPath);
+                    await remove(existingVersionTarballPath);
+                }
+
+                delete cdnInfo.versions[existingVersion];
             }
-
-            delete cdnInfo.versions[existingVersion];
         }
     }
 
@@ -277,12 +279,13 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version } : {| cdnName
 
 const cdnifyGenerate = async (name : string) => {
     const cdnNamespace = options.namespace;
-
+    
     for (const version of await getDistVersions(name)) {
         await cdnifyGenerateModule({
             cdnNamespace,
             name,
-            version
+            version,
+            prune: true
         });
 
         if (options.recursive) {
@@ -294,7 +297,8 @@ const cdnifyGenerate = async (name : string) => {
                     cdnNamespace,
                     name:    dependencyName,
                     // $FlowFixMe
-                    version: dependencyVersion
+                    version: dependencyVersion,
+                    prune:   false
                 });
             }));
         }
