@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /* @flow */
-/* eslint import/no-commonjs: off */
+/* eslint import/no-commonjs: off, no-console: off */
 
 import { join, extname } from 'path';
 import { userInfo } from 'os';
@@ -9,7 +9,7 @@ import { lookup } from 'dns';
 
 import config from 'libnpmconfig';
 import fetch from 'node-fetch';
-import { ensureDir, outputFile, exists, existsSync, readFileSync } from 'fs-extra';
+import { ensureDir, outputFile, exists, remove, existsSync, readFileSync } from 'fs-extra';
 import download from 'download';
 import commandLineArgs from 'command-line-args';
 import { prompt } from 'inquirer';
@@ -138,7 +138,6 @@ const npmFetch = async (url) => {
         opts.agent = new HttpsProxyAgent(options.npmproxy);
     }
 
-    // eslint-disable-next-line no-console
     console.info('GET', url);
     return await fetch(url, opts);
 };
@@ -161,7 +160,6 @@ const npmDownload = async (url, dir, filename) => {
         opts.agent = new HttpsProxyAgent(options.npmproxy);
     }
 
-    // eslint-disable-next-line no-console
     console.info('SYNC', url);
     await download(url, dir, opts);
 };
@@ -244,6 +242,22 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version } : {| cdnName
 
     const cdnInfo = JSON.parse(JSON.stringify(pkgInfo));
 
+    const activeVersions = new Set(Object.values(cdnInfo['dist-tags']));
+
+    for (const existingVersion of Object.keys(cdnInfo.versions)) {
+        if (!activeVersions.has(existingVersion)) {
+            const versionConfig = cdnInfo.versions[existingVersion];
+            const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
+
+            if (await exists(existingVersionTarballPath)) {
+                console.info('Cleaning up', existingVersionTarballPath);
+                await remove(existingVersionTarballPath);
+            }
+
+            delete cdnInfo.versions[existingVersion];
+        }
+    }
+
     for (const [ moduleVersion, moduleVersionInfo ] of Object.entries(cdnInfo.versions)) {
         const moduleVersionTarballFileName = `${ moduleVersion }${ extname(tarball) }`;
         const moduleVersionTarballFile = join(cdnModuleTarballDir, moduleVersionTarballFileName);
@@ -292,7 +306,6 @@ const exec = async <T>(cmd : string, envVars? : {| [string] : string |}) : Promi
 
     const cmdString = `> ${ Object.keys(env).map(key => `${ key }=${ env[key] }`).join(' ') } ${ cmd }\n`;
 
-    // eslint-disable-next-line no-console
     console.log(cmdString);
 
     for (const key of Object.keys(env)) {
@@ -383,7 +396,6 @@ const cdnifyDeploy = async () => {
     await sleep(3 * 1000);
 
     if (!approveRes.ok) {
-        // eslint-disable-next-line no-console
         console.warn(`Approval failed with status ${ approveRes.status }`);
         if (!await getYesNo(`Approval failed with status ${ approveRes.status }. Please try to approve manually.\n\nhttps://cdnx-ui.qa.paypal.com/approve/${ id }\n\nContinue with release?`)) {
             throw new Error(`Aborted deploy`);
@@ -421,7 +433,6 @@ const run = async () => {
 };
 
 run().catch((err) => {
-    // eslint-disable-next-line no-console
     console.error(err);
     // eslint-disable-next-line no-process-exit
     process.exit(1);
