@@ -215,7 +215,7 @@ const getDistVersion = async (name : string) : Promise<string> => {
     return (await info(name))['dist-tags'][options.disttag];
 };
 
-const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
+const cdnifyGenerateModule = async ({ cdnNamespace, name, version, prune = true }) => {
     const infoRes = await npmFetch(`${ options.registry }/${ name }`);
     const pkgInfo = await infoRes.json();
 
@@ -252,17 +252,19 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
 
     const activeVersions = new Set(Object.values(cdnInfo['dist-tags']));
 
-    for (const existingVersion of Object.keys(cdnInfo.versions)) {
-        if (!activeVersions.has(existingVersion)) {
-            const versionConfig = cdnInfo.versions[existingVersion];
-            const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
+    if (prune) {
+        for (const existingVersion of Object.keys(cdnInfo.versions)) {
+            if (!activeVersions.has(existingVersion)) {
+                const versionConfig = cdnInfo.versions[existingVersion];
+                const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
 
-            if (await exists(existingVersionTarballPath)) {
-                console.info('Cleaning up', existingVersionTarballPath);
-                await remove(existingVersionTarballPath);
+                if (await exists(existingVersionTarballPath)) {
+                    console.info('Cleaning up', existingVersionTarballPath);
+                    await remove(existingVersionTarballPath);
+                }
+
+                delete cdnInfo.versions[existingVersion];
             }
-
-            delete cdnInfo.versions[existingVersion];
         }
     }
 
@@ -291,7 +293,8 @@ const cdnifyGenerate = async (name : string) => {
     await cdnifyGenerateModule({
         cdnNamespace,
         name,
-        version
+        version,
+        prune: true
     });
 
     if (options.recursive) {
@@ -300,7 +303,8 @@ const cdnifyGenerate = async (name : string) => {
                 cdnNamespace,
                 name:    dependencyName,
                 // $FlowFixMe
-                version: dependency.version
+                version: dependency.version,
+                prune:   false
             });
         }));
     }
