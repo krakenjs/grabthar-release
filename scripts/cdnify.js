@@ -253,17 +253,46 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, prune = true 
     const activeVersions = new Set(Object.values(cdnInfo['dist-tags']));
 
     if (prune) {
+        const keepList = {};
+
         for (const existingVersion of Object.keys(cdnInfo.versions)) {
-            if (!activeVersions.has(existingVersion)) {
-                const versionConfig = cdnInfo.versions[existingVersion];
-                const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
-
-                if (await exists(existingVersionTarballPath)) {
-                    console.info('Cleaning up', existingVersionTarballPath);
-                    await remove(existingVersionTarballPath);
-                }
-
+            const keep = activeVersions.has(existingVersion);
+            const versionConfig = cdnInfo.versions[existingVersion];
+            const versionDependencyConfig = versionConfig.dependencies || {};
+            const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
+                
+            if (keep) {
+                keepList[existingVersionTarballPath] = true;
+            } else {
+                keepList[existingVersionTarballPath] = keepList[existingVersionTarballPath] || false;
                 delete cdnInfo.versions[existingVersion];
+            }
+
+            for (const dependencyName of Object.keys(versionDependencyConfig)) {
+                const dependencyVersion = versionDependencyConfig[dependencyName];
+
+                const sanitizedDependencyName = dependencyName.replace('@', '');
+
+                const cdnDependencyModuleDir = join(options.cdnpath, sanitizedDependencyName);
+                const cdnDependencyModuleTarballDir = join(cdnDependencyModuleDir, options.tarballfolder);
+                const existingDependencyVersionTarballPath = join(cdnDependencyModuleTarballDir, `${ dependencyVersion }${ extname(versionConfig.dist.tarball) }`);
+
+                if (keep) {
+                    keepList[existingDependencyVersionTarballPath] = true;
+                } else {
+                    keepList[existingDependencyVersionTarballPath] = keepList[existingDependencyVersionTarballPath] || false;
+                }
+            }
+        }
+
+        for (const existingVersionTarballPath of Object.keys(keepList)) {
+            if (keepList[existingVersionTarballPath]) {
+                continue;
+            }
+
+            if (await exists(existingVersionTarballPath)) {
+                console.info('Cleaning up', existingVersionTarballPath);
+                await remove(existingVersionTarballPath);
             }
         }
     }
