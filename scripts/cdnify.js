@@ -213,8 +213,11 @@ const info = async (name : string) : Promise<PackageInfo> => {
     return json;
 };
 
-const getDistVersion = async (name : string) : Promise<string> => {
-    return (await info(name))['dist-tags'][options.disttag];
+const getDistVersions = async (name : string) : Promise<$ReadOnlyArray<string>> => {
+    const distTags = (await info(name))['dist-tags'];
+    // $FlowFixMe
+    const versions : $ReadOnlyArray<string>  = Object.values(distTags);
+    return [ ...new Set(versions) ];
 };
 
 const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
@@ -272,13 +275,13 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
 const cdnifyGenerate = async (name : string) => {
     const cdnNamespace = options.namespace;
 
-    const version = await getDistVersion(name);
-
-    await cdnifyGenerateModule({
-        cdnNamespace,
-        name,
-        version
-    });
+    for (const version of await getDistVersions(name)) {
+        await cdnifyGenerateModule({
+            cdnNamespace,
+            name,
+            version
+        });
+    }
 
     if (options.recursive) {
         await Promise.all(Object.entries(getPackageLock().dependencies).map(async ([ dependencyName, dependency ]) => {
