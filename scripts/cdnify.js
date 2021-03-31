@@ -21,14 +21,6 @@ type Package = {|
     version : string
 |};
 
-type PackageLock = {|
-    dependencies : {|
-        [string] : {|
-            version : string
-        |}
-    |}
-|};
-
 type NodeOps = {|
     web : {|
         staticNamespace : string
@@ -41,6 +33,9 @@ type PackageInfo = {|
         [string] : {|
             dist : {|
                 tarball : string
+            |},
+            dependencies : {|
+                [string] : string
             |}
         |}
     |},
@@ -74,7 +69,6 @@ const options = commandLineArgs([
     { name: 'cdnpath',       type: String,  defaultValue: process.env.CDN_PATH       || join(process.cwd(), 'cdn') },
     { name: 'recursive',     type: Boolean, defaultValue: booleanEnv(process.env.RECURSIVE) },
     { name: 'package',       type: String,  defaultValue: process.env.PACKAGE        || join(process.cwd(), 'package.json') },
-    { name: 'packagelock',   type: String,  defaultValue: process.env.PACKAGE_LOCK   || join(process.cwd(), 'package-lock.json') },
     { name: 'nodeops',       type: String,  defaultValue: process.env.NODE_OPS       || join(process.cwd(), '.nodeops') },
     { name: 'cdnapi',        type: String,  defaultValue: process.env.CDNAPI         || 'https://cdnx-api.qa.paypal.com' },
     { name: 'requester',     type: String,  defaultValue: process.env.REQUESTER      || 'svc-xo' },
@@ -91,13 +85,6 @@ const getPackage = () : Package => {
         throw new Error(`Package file not found`);
     }
     return JSON.parse(readFileSync(options.package));
-};
-
-const getPackageLock = () : PackageLock => {
-    if (!options.packagelock || !existsSync(options.packagelock)) {
-        throw new Error(`Package Lock file not found`);
-    }
-    return JSON.parse(readFileSync(options.packagelock));
 };
 
 const getNodeOps = () : NodeOps => {
@@ -183,13 +170,15 @@ const npmDownload = async (url, dir, filename) => {
 const infoCache = {};
 
 const info = async (name : string) : Promise<PackageInfo> => {
-    if (infoCache[name]) {
-        return await infoCache[name];
-    }
+    let infoResPromise;
 
-    const infoResPromise = infoCache[name] = npmFetch(`${ options.registry }/${ name }`);
-    const infoRes = await infoResPromise;
-    const json = await infoRes.json();
+    if (infoCache[name]) {
+        infoResPromise = await infoCache[name];
+    } else {
+        infoResPromise = infoCache[name] = npmFetch(`${ options.registry }/${ name }`).then(res => res.json());
+    }
+    
+    const json = await infoResPromise;
 
     if (!json) {
         throw new Error(`No info returned for ${ name }`);
@@ -220,12 +209,12 @@ const getDistVersions = async (name : string) : Promise<$ReadOnlyArray<string>> 
     return [ ...new Set(versions) ];
 };
 
-const cdnifyGenerateModule = async ({ cdnNamespace, name, version }) => {
+const cdnifyGenerateModule = async ({ cdnNamespace, name, version } : {| cdnNamespace : string, name : string, version : string |}) => {
     const infoRes = await npmFetch(`${ options.registry }/${ name }`);
     const pkgInfo = await infoRes.json();
 
     if (!version) {
-        throw new Error(`Package lock for ${ name } has no version`);
+        throw new Error(`Package ${ name } has no version`);
     }
 
     const versionInfo = pkgInfo.versions[version];
@@ -281,17 +270,20 @@ const cdnifyGenerate = async (name : string) => {
             name,
             version
         });
-    }
 
-    if (options.recursive) {
-        await Promise.all(Object.entries(getPackageLock().dependencies).map(async ([ dependencyName, dependency ]) => {
-            await cdnifyGenerateModule({
-                cdnNamespace,
-                name:    dependencyName,
-                // $FlowFixMe
-                version: dependency.version
-            });
-        }));
+        if (options.recursive) {
+            const packageInfo = await info(name);
+            const versionInfo = packageInfo.versions[version];
+
+            await Promise.all(Object.entries(versionInfo.dependencies).map(async ([ dependencyName, dependencyVersion ]) => {
+                await cdnifyGenerateModule({
+                    cdnNamespace,
+                    name:    dependencyName,
+                    // $FlowFixMe
+                    version: dependencyVersion
+                });
+            }));
+        }
     }
 };
 
