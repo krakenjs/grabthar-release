@@ -208,8 +208,8 @@ const info = async (name : string) : Promise<PackageInfo> => {
 
     return {
         'name':      result.name,
-        'versions':  resultVersions,
-        'dist-tags': result['dist-tags']
+        'dist-tags': result['dist-tags'],
+        'versions':  resultVersions
     };
 };
 
