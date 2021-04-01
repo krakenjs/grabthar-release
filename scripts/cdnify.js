@@ -28,20 +28,20 @@ type NodeOps = {|
 |};
 
 type PackageInfo = {|
-    version : string,
-    versions : {|
+    'name' : string,
+    'versions' : {
         [string] : {|
-            dist : {|
-                tarball : string
-            |},
-            dependencies : {|
-                [string] : string
+            'dependencies' : {
+                [ string ] : string
+            },
+            'dist' : {|
+                'tarball' : string
             |}
         |}
-    |},
-    'dist-tags' : {|
-        [string] : string
-    |}
+    },
+    'dist-tags' : {
+        [ string ] : string
+    }
 |};
 
 const booleanEnv = (val, def = false) => {
@@ -121,6 +121,10 @@ const dns = async (host, family = 6) => {
     });
 };
 
+const unique = <T>(arr : $ReadOnlyArray<T>) : $ReadOnlyArray<T> => {
+    return [ ...new Set(arr) ];
+};
+
 const npmFetch = async (url) => {
     const opts = {};
 
@@ -190,26 +194,42 @@ const info = async (name : string) : Promise<PackageInfo> => {
         throw new Error(`${ options.disttag } dist tag not defined`);
     }
 
-    const localPackage = await getPackage();
-    const publicRegistryVersion = json['dist-tags'][options.disttag];
+    const result = JSON.parse(JSON.stringify(json));
 
-    if (options.disttag === 'latest' && localPackage.version !== publicRegistryVersion) {
-        throw new Error(`Version mismatch between local package.json (${ localPackage.version }) and public npm registry (${ publicRegistryVersion }).`);
+    const resultVersions = {};
+    for (const resultVersion of Object.keys(result.versions || {})) {
+        resultVersions[resultVersion] = {
+            dependencies: result.versions[resultVersion].dependencies,
+            dist:         {
+                tarball: result.versions[resultVersion].dist.tarball
+            }
+        };
     }
 
-    return json;
+    return {
+        'name':      result.name,
+        'versions':  resultVersions,
+        'dist-tags': result['dist-tags']
+    };
 };
 
 const getDistVersions = async (name : string) : Promise<$ReadOnlyArray<string>> => {
     const distTags = (await info(name))['dist-tags'];
     // $FlowFixMe
     const versions : $ReadOnlyArray<string>  = Object.values(distTags);
-    return [ ...new Set(versions) ];
+    return unique(versions);
 };
 
-const cdnifyGenerateModule = async ({ cdnNamespace, name, version, prune = true } : {| cdnNamespace : string, name : string, version : string, prune? : boolean |}) => {
-    const infoRes = await npmFetch(`${ options.registry }/${ name }`);
-    const pkgInfo = await infoRes.json();
+type CdnifyGenerateModuleOptions = {|
+    cdnNamespace : string,
+    name : string,
+    version : string,
+    prune? : boolean,
+    parentName? : string
+|};
+
+const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, prune = true } : CdnifyGenerateModuleOptions) => {
+    const pkgInfo = await info(name);
 
     if (!version) {
         throw new Error(`Package ${ name } has no version`);
@@ -240,14 +260,20 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, prune = true 
 
     await npmDownload(tarball, cdnModuleTarballDir, cdnModuleTarballFileName);
 
-    const cdnInfo = JSON.parse(JSON.stringify(pkgInfo));
-
-    const activeVersions = new Set(Object.values(cdnInfo['dist-tags']));
-
     if (prune) {
-        for (const existingVersion of Object.keys(cdnInfo.versions)) {
-            if (!activeVersions.has(existingVersion)) {
-                const versionConfig = cdnInfo.versions[existingVersion];
+        let activeVersions;
+
+        if (parentName) {
+            const parentPackage = await info(parentName);
+            const parentActiveVersions = await getDistVersions(parentName);
+            activeVersions = unique(parentActiveVersions.map(parentActiveVersion => parentPackage.versions[parentActiveVersion].dependencies[name]));
+        } else {
+            activeVersions = await getDistVersions(name);
+        }
+        
+        for (const existingVersion of Object.keys(pkgInfo.versions)) {
+            if (activeVersions.indexOf(existingVersion) === -1) {
+                const versionConfig = pkgInfo.versions[existingVersion];
                 const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
 
                 if (await exists(existingVersionTarballPath)) {
@@ -255,12 +281,12 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, prune = true 
                     await remove(existingVersionTarballPath);
                 }
 
-                delete cdnInfo.versions[existingVersion];
+                delete pkgInfo.versions[existingVersion];
             }
         }
     }
 
-    for (const [ moduleVersion, moduleVersionInfo ] of Object.entries(cdnInfo.versions)) {
+    for (const [ moduleVersion, moduleVersionInfo ] of Object.entries(pkgInfo.versions)) {
         const moduleVersionTarballFileName = `${ moduleVersion }${ extname(tarball) }`;
         const moduleVersionTarballFile = join(cdnModuleTarballDir, moduleVersionTarballFileName);
 
@@ -274,7 +300,7 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, prune = true 
         }
     }
 
-    await outputFile(cdnModuleInfoFile, JSON.stringify(cdnInfo, null, 4));
+    await outputFile(cdnModuleInfoFile, JSON.stringify(pkgInfo, null, 4));
 };
 
 const cdnifyGenerate = async (name : string) => {
@@ -293,12 +319,15 @@ const cdnifyGenerate = async (name : string) => {
             const versionInfo = packageInfo.versions[version];
 
             await Promise.all(Object.entries(versionInfo.dependencies).map(async ([ dependencyName, dependencyVersion ]) => {
+                // $FlowFixMe
+                dependencyVersion = dependencyVersion.toString();
+
                 await cdnifyGenerateModule({
                     cdnNamespace,
-                    name:    dependencyName,
-                    // $FlowFixMe
-                    version: dependencyVersion,
-                    prune:   false
+                    name:          dependencyName,
+                    version:       dependencyVersion,
+                    prune:         true,
+                    parentName:    name
                 });
             }));
         }
