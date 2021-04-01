@@ -1,6 +1,6 @@
 {
   "name": "grabthar-release",
-  "version": "1.0.63",
+  "version": "1.0.64",
   "description": "Helper scripts for grabthar releases.",
   "main": "index.js",
   "scripts": {
