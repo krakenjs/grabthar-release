@@ -77,7 +77,8 @@ const options = commandLineArgs([
     { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
     { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
     { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) },
-    { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) }
+    { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) },
+    { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) }
 ]);
 
 const getPackage = () : Package => {
@@ -179,7 +180,7 @@ const info = async (name : string) : Promise<PackageInfo> => {
     } else {
         infoResPromise = infoCache[name] = npmFetch(`${ options.registry }/${ name }`).then(res => res.json());
     }
-    
+
     const json = await infoResPromise;
 
     if (!json) {
@@ -270,7 +271,7 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, p
         } else {
             activeVersions = await getDistVersions(name);
         }
-        
+
         for (const existingVersion of Object.keys(pkgInfo.versions)) {
             if (activeVersions.indexOf(existingVersion) === -1) {
                 const versionConfig = pkgInfo.versions[existingVersion];
@@ -305,7 +306,7 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, p
 
 const cdnifyGenerate = async (name : string) => {
     const cdnNamespace = options.namespace;
-    
+
     for (const version of await getDistVersions(name)) {
         await cdnifyGenerateModule({
             cdnNamespace,
@@ -456,6 +457,14 @@ const run = async () => {
     }
 
     await cdnifyGenerate(options.module);
+
+    if (options.commitonly) {
+        if (!await getYesNo('Commit changes?')) {
+            return;
+        }
+
+        return await cdnifyCommit();
+    }
 
     if (!await getYesNo('Commit and deploy?')) {
         return;
