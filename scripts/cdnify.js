@@ -8,13 +8,18 @@ import { userInfo } from 'os';
 import { lookup } from 'dns';
 
 import config from 'libnpmconfig';
-import fetch from 'node-fetch';
+import nodeFetch from 'node-fetch';
+import fetchRetry from '@vercel/fetch-retry';
 import { ensureDir, outputFile, exists, remove, existsSync, readFileSync } from 'fs-extra';
 import download from 'download';
 import commandLineArgs from 'command-line-args';
 import { prompt } from 'inquirer';
 import HttpsProxyAgent from 'https-proxy-agent';
 import shell from 'shelljs';
+
+// use fetch() with retry logic to prevent failing from ECONNRESET errors
+// https://github.com/vercel/fetch-retry#rationale
+const fetch = fetchRetry(nodeFetch);
 
 type Package = {|
     name : string,

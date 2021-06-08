@@ -59,6 +59,7 @@
   ],
   "readmeFilename": "README.md",
   "dependencies": {
+    "@vercel/fetch-retry": "^5.0.3",
     "check-node-version": "^4.0.3",
     "command-line-args": "^5.1.1",
     "download": "^8.0.0",
