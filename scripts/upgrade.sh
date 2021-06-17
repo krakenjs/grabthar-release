@@ -5,11 +5,27 @@ set -e;
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 $DIR/grabthar-validate-git;
 
-if [ -z "$1" ]; then
-    npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade
-else
-    npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade --filter="$1"
-fi;
+attempt=1
+max_attempts=5
+
+until [ $attempt -eq $((max_attempts+1)) ]
+do
+    if [ -z "$1" ]; then
+        printf "npm-check-updates attempt $attempt of $max_attempts\n"
+        npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade && break
+        if [ $attempt -eq $max_attempts ]; then
+            printf "npm-check-updates failed after $max_attempts attempts. Please try running npm run upgrade again.\n"
+        fi;
+        attempt=$((attempt+1))
+    else
+        printf "npm-check-updates attempt $attempt of $max_attempts\n"
+        npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade --filter="$1" && break
+        if [ $attempt -eq $max_attempts ]; then
+            printf "npm-check-updates failed after $max_attempts attempts. Please try running npm run upgrade again.\n"
+        fi;
+        attempt=$((attempt+1))
+    fi;
+done
 
 rm -rf ./node_modules;
 rm -f ./package-lock.json;
