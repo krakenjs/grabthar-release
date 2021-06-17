@@ -7,6 +7,7 @@ $DIR/grabthar-validate-git;
 
 attempt=1
 max_attempts=5
+failure_message="npm-check-updates failed after $max_attempts attempts. Please try running npm run upgrade again.\n"
 
 until [ $attempt -eq $((max_attempts+1)) ]
 do
@@ -14,14 +15,14 @@ do
         printf "npm-check-updates attempt $attempt of $max_attempts\n"
         npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade && break
         if [ $attempt -eq $max_attempts ]; then
-            printf "npm-check-updates failed after $max_attempts attempts. Please try running npm run upgrade again.\n"
+            printf "$failure_message"
         fi;
         attempt=$((attempt+1))
     else
         printf "npm-check-updates attempt $attempt of $max_attempts\n"
         npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade --filter="$1" && break
         if [ $attempt -eq $max_attempts ]; then
-            printf "npm-check-updates failed after $max_attempts attempts. Please try running npm run upgrade again.\n"
+            printf "$failure_message"
         fi;
         attempt=$((attempt+1))
     fi;
