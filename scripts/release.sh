@@ -29,5 +29,5 @@ $DIR/grabthar-verify-npm-publish $local_version $DIST_TAG
 
 # update non-prod dist tags whenever the latest dist tag changes
 if [ "$DIST_TAG" = "latest" ]; then
-    $DIR/grabthar-activate $local_version "test local stage"
+    CDNIFY=false $DIR/grabthar-activate $local_version "test local stage"
 fi;
