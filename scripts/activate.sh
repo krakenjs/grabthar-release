@@ -20,6 +20,10 @@ if [ -z "$version" ]; then
     version=$(npm view $module version);
 fi;
 
+if [ -z "$CDNIFY" ]; then
+    CDNIFY=true
+fi;
+
 if [ -z "$2" ]; then
     envs="$defenvs"
 else
@@ -44,4 +48,6 @@ for env in $envs; do
     $DIR/grabthar-verify-npm-publish "$version" "$tag-$env";
 done;
 
-$DIR/grabthar-cdnify
+if [ "$CDNIFY" = true ]; then
+    $DIR/grabthar-cdnify
+fi;
