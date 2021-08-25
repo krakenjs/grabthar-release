@@ -37,7 +37,13 @@ else
     done;
 fi;
 
+IS_NPM_OTP=false
+
 if [ -z "$NPM_TOKEN" ]; then
+    IS_NPM_OTP=true
+fi;
+
+if [ "$IS_NPM_OTP" = true ]; then
     read -p "NPM 2FA Code: " twofactorcode
 fi;
 
