@@ -37,7 +37,9 @@ else
     done;
 fi;
 
-read -p "NPM 2FA Code: " twofactorcode
+if [ -z "$NPM_TOKEN" ]; then
+    read -p "NPM 2FA Code: " twofactorcode
+fi;
 
 for env in $envs; do
     echo npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
