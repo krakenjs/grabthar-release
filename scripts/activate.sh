@@ -37,11 +37,24 @@ else
     done;
 fi;
 
-read -p "NPM 2FA Code: " twofactorcode
+IS_NPM_OTP=false
+
+if [ -z "$NPM_TOKEN" ]; then
+    IS_NPM_OTP=true
+fi;
+
+if [ "$IS_NPM_OTP" = true ]; then
+    read -p "NPM 2FA Code: " twofactorcode
+fi;
 
 for env in $envs; do
-    echo npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
-    npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
+    if [ "$IS_NPM_OTP" = true ]; then
+        echo npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
+        npm dist-tag add $module@$version "$tag-$env" --otp="$twofactorcode";
+    else
+        echo npm dist-tag add $module@$version "$tag-$env"
+        NPM_TOKEN=$NPM_TOKEN npm dist-tag add $module@$version "$tag-$env"
+    fi;
 done;
 
 for env in $envs; do

@@ -15,7 +15,7 @@ npm version ${1-patch};
 git push;
 git push --tags;
 $DIR/grabthar-flatten;
-npm publish --tag $DIST_TAG;
+NPM_TOKEN=$NPM_TOKEN npm publish --tag $DIST_TAG;
 git checkout package.json;
 git checkout package-lock.json || echo 'Package lock not found';
 
