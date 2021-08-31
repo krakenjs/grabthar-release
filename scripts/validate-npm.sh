@@ -2,8 +2,14 @@
 
 set -e;
 
-if npm whoami &> /dev/null; then
-    echo "npm username: $(npm whoami)"
+if [ -n "$NPM_TOKEN" ]; then
+    whoami=$(NPM_TOKEN=$NPM_TOKEN npm whoami)
+else
+    whoami=$(npm whoami)
+fi;
+
+if [ -n "$whoami" ]; then
+    echo "npm username: $whoami"
 else
     echo "You must be logged in to publish a release. Running 'npm login'"
     npm login
@@ -17,12 +23,12 @@ org=$(node --eval "
     }
 ")
 
-if [ "$org" ]; then
-    USER_ROLE=$(npm org ls $org "$(npm whoami)" --json)
+if [[ -n "$org" && -z "$NPM_TOKEN" ]]; then
+    USER_ROLE=$(npm org ls "$org" "$whoami" --json)
 
     PERMISSION=$(node --eval "
         let userRole = $USER_ROLE;
-        console.log(userRole['$(npm whoami)']);
+        console.log(userRole['$whoami']);
     " "$USER_ROLE")
 
     if [ ! "$PERMISSION" = "developer" ]; then
