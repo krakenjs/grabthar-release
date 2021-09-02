@@ -464,10 +464,6 @@ const run = async () => {
     await cdnifyGenerate(options.module);
 
     if (options.commitonly) {
-        if (!await getYesNo('Commit changes?')) {
-            return;
-        }
-
         return await cdnifyCommit();
     }
 
