@@ -9,7 +9,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 $DIR/grabthar-validate-git;
 $DIR/grabthar-validate-npm;
 
-
 if [ -z "$DIST_TAG" ]; then
     DIST_TAG="latest";
 fi;
