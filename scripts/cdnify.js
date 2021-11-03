@@ -5,17 +5,14 @@
 
 import { join, extname } from 'path';
 import { userInfo } from 'os';
-import { lookup } from 'dns';
 
-import config from 'libnpmconfig';
 import nodeFetch from 'node-fetch';
 import fetchRetry from '@vercel/fetch-retry';
 import { ensureDir, outputFile, exists, remove, existsSync, readFileSync } from 'fs-extra';
-import download from 'download';
 import commandLineArgs from 'command-line-args';
 import { prompt } from 'inquirer';
-import HttpsProxyAgent from 'https-proxy-agent';
-import shell from 'shelljs';
+
+import { info, booleanEnv, npmDownload, getDistVersions, unique, exec } from './grabthar-utils';
 
 // use fetch() with retry logic to prevent failing from ECONNRESET errors
 // https://github.com/vercel/fetch-retry#rationale
@@ -32,42 +29,10 @@ type NodeOps = {|
     |}
 |};
 
-type PackageInfo = {|
-    'name' : string,
-    'versions' : {
-        [string] : {|
-            'dependencies' : {
-                [ string ] : string
-            },
-            'dist' : {|
-                'tarball' : string
-            |}
-        |}
-    },
-    'dist-tags' : {
-        [ string ] : string
-    }
-|};
-
-const booleanEnv = (val, def = false) => {
-    if (val === '0' || val === 'false' || val === 'off') {
-        return false;
-    }
-
-    if (val) {
-        return true;
-    }
-
-    return def;
-};
-
-const conf = config.read();
-
 const options = commandLineArgs([
     { name: 'module', type: String, defaultOption: true },
 
     { name: 'cdn',           type: String,  defaultValue: process.env.CDN            || '' },
-    { name: 'registry',      type: String,  defaultValue: process.env.REGISTRY       || 'https://registry.npmjs.org' },
     { name: 'namespace',     type: String,  defaultValue: process.env.NAMESPACE      || '' },
     { name: 'infofile',      type: String,  defaultValue: process.env.INFO_FILE      || 'info.json' },
     { name: 'tarballfolder', type: String,  defaultValue: process.env.TARBALL_FOLDER || 'tarballs' },
@@ -80,8 +45,6 @@ const options = commandLineArgs([
     { name: 'password',      type: String,  defaultValue: process.env.SVC_PASSWORD },
     { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
     { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
-    { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
-    { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) },
     { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) },
     { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) }
 ]);
@@ -115,117 +78,6 @@ if (!options.cdn) {
     throw new Error(`CDN required`);
 }
 
-const getHost = (url) => {
-    return new URL(url).host;
-};
-
-const dns = async (host, family = 6) => {
-    return await new Promise((resolve, reject) => {
-        lookup(host, { family }, (err, address) => {
-            return err ? reject(err) : resolve(address);
-        });
-    });
-};
-
-const unique = <T>(arr : $ReadOnlyArray<T>) : $ReadOnlyArray<T> => {
-    return [ ...new Set(arr) ];
-};
-
-const npmFetch = async (url) => {
-    const opts = {};
-
-    const host = getHost(url);
-
-    if (opts.ipv6) {
-        const ip = await dns(host);
-        url = url.replace(host, `[${ ip }]`);
-    }
-
-    opts.headers = opts.headers || {};
-    opts.headers.host = host;
-
-    if (options.npmproxy) {
-        opts.agent = new HttpsProxyAgent(options.npmproxy);
-    }
-
-    console.info('GET', url);
-    return await fetch(url, opts);
-};
-
-const npmDownload = async (url, dir, filename) => {
-    const opts = {};
-
-    const host = getHost(url);
-
-    if (opts.ipv6) {
-        const ip = await dns(host);
-        url = url.replace(host, `[${ ip }]`);
-    }
-
-    opts.headers = opts.headers || {};
-    opts.headers.host = host;
-    opts.filename = filename;
-
-    if (options.npmproxy) {
-        opts.agent = new HttpsProxyAgent(options.npmproxy);
-    }
-
-    console.info('SYNC', url);
-    await download(url, dir, opts);
-};
-
-
-const infoCache = {};
-
-const info = async (name : string) : Promise<PackageInfo> => {
-    let infoResPromise;
-
-    if (infoCache[name]) {
-        infoResPromise = await infoCache[name];
-    } else {
-        infoResPromise = infoCache[name] = npmFetch(`${ options.registry }/${ name }`).then(res => res.json());
-    }
-
-    const json = await infoResPromise;
-
-    if (!json) {
-        throw new Error(`No info returned for ${ name }`);
-    }
-
-    if (!json.versions) {
-        throw new Error(`NPM info for ${ name } has no versions`);
-    }
-
-    if (!json['dist-tags'] || !json['dist-tags'][options.disttag]) {
-        throw new Error(`${ options.disttag } dist tag not defined`);
-    }
-
-    const result = JSON.parse(JSON.stringify(json));
-
-    const resultVersions = {};
-    for (const resultVersion of Object.keys(result.versions || {})) {
-        resultVersions[resultVersion] = {
-            dependencies: result.versions[resultVersion].dependencies,
-            dist:         {
-                tarball: result.versions[resultVersion].dist.tarball
-            }
-        };
-    }
-
-    return {
-        'name':      result.name,
-        'dist-tags': result['dist-tags'],
-        'versions':  resultVersions
-    };
-};
-
-const getDistVersions = async (name : string) : Promise<$ReadOnlyArray<string>> => {
-    const distTags = (await info(name))['dist-tags'];
-    // $FlowFixMe
-    const versions : $ReadOnlyArray<string>  = Object.values(distTags);
-    return unique(versions);
-};
-
 type CdnifyGenerateModuleOptions = {|
     cdnNamespace : string,
     name : string,
@@ -235,7 +87,7 @@ type CdnifyGenerateModuleOptions = {|
 |};
 
 const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, prune = true } : CdnifyGenerateModuleOptions) => {
-    const pkgInfo = await info(name);
+    const pkgInfo = await info(name, options.disttag);
 
     if (!version) {
         throw new Error(`Package ${ name } has no version`);
@@ -270,7 +122,7 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, p
         let activeVersions;
 
         if (parentName) {
-            const parentPackage = await info(parentName);
+            const parentPackage = await info(parentName, options.disttag);
             const parentActiveVersions = await getDistVersions(parentName);
             activeVersions = unique(parentActiveVersions.map(parentActiveVersion => parentPackage.versions[parentActiveVersion].dependencies[name]));
         } else {
@@ -321,7 +173,7 @@ const cdnifyGenerate = async (name : string) => {
         });
 
         if (options.recursive) {
-            const packageInfo = await info(name);
+            const packageInfo = await info(name, options.disttag);
             const versionInfo = packageInfo.versions[version];
 
             await Promise.all(Object.entries(versionInfo.dependencies).map(async ([ dependencyName, dependencyVersion ]) => {
@@ -337,29 +189,6 @@ const cdnifyGenerate = async (name : string) => {
                 });
             }));
         }
-    }
-};
-
-const exec = async <T>(cmd : string, envVars? : {| [string] : string |}) : Promise<T> => {
-    const env = envVars || {};
-
-    const cmdString = `> ${ Object.keys(env).map(key => `${ key }=${ env[key] }`).join(' ') } ${ cmd }\n`;
-
-    console.log(cmdString);
-
-    for (const key of Object.keys(env)) {
-        shell.env[key] = env[key];
-    }
-
-    const result = await shell.exec(cmd);
-    if (result.code !== 0) {
-        throw new Error(result.stderr || result.stdout || `Command failed with code ${ result.code }`);
-    }
-
-    try {
-        return JSON.parse(result.stdout);
-    } catch (err) {
-        return result.stdout;
     }
 };
 

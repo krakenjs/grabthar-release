@@ -25,7 +25,9 @@
     "grabthar-validate-git": "./scripts/validate-git.sh",
     "grabthar-validate-npm": "./scripts/validate-npm.sh",
     "grabthar-validate-flat": "./scripts/validate-flat.js",
-    "grabthar-verify-npm-publish": "./scripts/verify-npm-publish.sh"
+    "grabthar-verify-npm-publish": "./scripts/verify-npm-publish.sh",
+    "grabthar-dependency-test": "./scripts/dependency-test.js",
+    "grabthar-utils.js": "./scripts/grabthar-utils.js"
   },
   "files": [
     "scripts"
@@ -71,6 +73,7 @@
     "libnpmconfig": "^1.2.1",
     "node-fetch": "^2.6.0",
     "npm": "^6.14.0",
+    "parse-diff": "^0.8.1",
     "shelljs": "^0.8.4"
   }
 }

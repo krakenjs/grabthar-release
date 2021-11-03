@@ -22,6 +22,10 @@ if [ ! -f ./package-lock.json ]; then
     exit 1;
 fi
 
+if [ -z "$EXPERIMENTAL_DEPENDENCY_TEST" ]; then
+    $DIR/grabthar-dependency-test;
+fi;
+
 node $DIR/grabthar-prune;
 
 git add package.json;
