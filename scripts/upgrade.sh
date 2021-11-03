@@ -22,7 +22,7 @@ if [ ! -f ./package-lock.json ]; then
     exit 1;
 fi
 
-if [ -z "$EXPERIMENTAL_DEPENDENCY_TEST" ]; then
+if [ "$EXPERIMENTAL_DEPENDENCY_TEST" = "1" ]; then
     $DIR/grabthar-dependency-test;
 fi;
 
