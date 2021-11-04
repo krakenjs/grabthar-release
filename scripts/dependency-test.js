@@ -6,7 +6,7 @@ import { readFile } from 'fs-extra';
 
 import { getCommittedFile, flattenDependencies, findAllDependentModules, generateTempDirectory, info,
     gitClone, gitCheckout, rmrf, npmInstall, npmTest, updatePackageWithLockedDependencies, getPackageForDir,
-    packageHasScript, npmReleaseTest, NPM_SCRIPT, type PackageLock } from './grabthar-utils';
+    packageHasScript, npmReleaseTest, NPM_SCRIPT, type PackageLock, type PackageInfo } from './grabthar-utils';
 
 const PACKAGE_LOCK_FILE_NAME = 'package-lock.json';
 
@@ -51,17 +51,30 @@ async function runTests(moduleName : string, packageLock : PackageLock) : Promis
     
     console.info(`Running tests for ${ moduleName }@${ version }`);
     const dir = await generateTempDirectory(moduleName);
-    const packageInfo = await info(moduleName);
-    const packageVersionInfo = packageInfo.versions[version];
-    const repo = packageVersionInfo.repository.url.replace(/^.+:\/\//, 'https://');
 
     try {
+        const packageInfo : PackageInfo = await info(moduleName);
+        const packageVersionInfo = packageInfo.versions[version];
+
+        const repoUrl = packageVersionInfo.repository && packageVersionInfo.repository.url;
+        const gitHead = packageVersionInfo.gitHead;
+
+        if (!repoUrl) {
+            throw new Error(`No repository found for ${ moduleName }@${ version }`);
+        }
+
+        if (!gitHead) {
+            throw new Error(`No git head commit found for ${ moduleName }@${ version }`);
+        }
+
+        const repo = repoUrl.replace(/^.+:\/\//, 'https://');
+    
         if (!repo.includes('github.com')) {
-            throw new Error(`Can not run tests for ${ moduleName } - non-public github repo: ${ repo }`);
+            throw new Error(`Can not run tests for ${ moduleName }@${ version } - non-public github repo: ${ repo }`);
         }
 
         await gitClone(repo, dir);
-        await gitCheckout(dir, packageVersionInfo.gitHead);
+        await gitCheckout(dir, gitHead);
         await updatePackageWithLockedDependencies(dir, packageLock);
         await npmInstall(dir);
 

@@ -47,7 +47,9 @@ const options = commandLineArgs([
     { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
     { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) },
     { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) }
-]);
+], {
+    partial: true
+});
 
 const getPackage = () : Package => {
     if (!options.package || !existsSync(options.package)) {

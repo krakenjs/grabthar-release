@@ -34,7 +34,9 @@ const options = commandLineArgs([
     { name: 'registry',      type: String,  defaultValue: process.env.REGISTRY       || 'https://registry.npmjs.org' },
     { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
     { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) }
-]);
+], {
+    partial: true
+});
 
 export const unique = <T>(arr : $ReadOnlyArray<T>) : $ReadOnlyArray<T> => {
     return [ ...new Set(arr) ];
@@ -150,10 +152,10 @@ export type PackageInfo = {|
             'dist' : {|
                 'tarball' : string
             |},
-            'repository' : {|
-                'url' : string
+            'repository'? : {|
+                'url'? : string
             |},
-            'gitHead' : string
+            'gitHead'? : string
         |}
     },
     'dist-tags' : {
@@ -190,15 +192,17 @@ export const info = async (name : string, expectedDistTag? : string) : Promise<P
 
     const resultVersions = {};
     for (const resultVersion of Object.keys(result.versions || {})) {
+        const { repository = {}, gitHead } = result.versions[resultVersion];
+
         resultVersions[resultVersion] = {
             dependencies: result.versions[resultVersion].dependencies,
             dist:         {
                 tarball: result.versions[resultVersion].dist.tarball
             },
             repository: {
-                url: result.versions[resultVersion].repository.url
+                url: repository.url
             },
-            gitHead: result.versions[resultVersion].gitHead
+            gitHead
         };
     }
 
