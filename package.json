@@ -67,7 +67,7 @@
     "download": "^8.0.0",
     "flow-bin": "0.131.0",
     "fs-extra": "^5.0.0",
-    "grumbler-scripts": "^3",
+    "grumbler-scripts": "^5",
     "https-proxy-agent": "^5.0.0",
     "inquirer": "^7.3.2",
     "libnpmconfig": "^1.2.1",
