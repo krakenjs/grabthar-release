@@ -13,3 +13,6 @@ let BUMP = process.argv.find(element => element.includes('BUMP='))?.replace('BUM
 BUMP ?? (BUMP = 'patch')
 
 await $`npm version ${BUMP}`
+
+await $`git push`
+await $`git push --tags`
