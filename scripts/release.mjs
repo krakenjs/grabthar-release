@@ -27,3 +27,5 @@ await $`git checkout package-lock.json || echo 'Package lock not found'`
 
 const cwd = process.cwd()
 const local_version = require(`${cwd}/package.json`).version
+
+await $`zx ${DIR}/grabthar-verify-npm-publish ${local_version} ${DIST_TAG}`
