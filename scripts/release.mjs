@@ -22,3 +22,5 @@ let NPM_TOKEN = process.argv.find(element => element.includes('NPM_TOKEN='))?.re
 NPM_TOKEN ?? (NPM_TOKEN = '')
 
 await $`NPM_TOKEN=${NPM_TOKEN} npm publish --tag ${DIST_TAG}`
+await $`git checkout package.json`
+await $`git checkout package-lock.json || echo 'Package lock not found'`
