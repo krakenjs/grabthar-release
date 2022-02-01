@@ -20,3 +20,5 @@ await $`zx ${DIR}/grabthar-flatten`
 
 let NPM_TOKEN = process.argv.find(element => element.includes('NPM_TOKEN='))?.replace('NPM_TOKEN=', '')
 NPM_TOKEN ?? (NPM_TOKEN = '')
+
+await $`NPM_TOKEN=${NPM_TOKEN} npm publish --tag ${DIST_TAG}`
