@@ -16,3 +16,4 @@ await $`npm version ${BUMP}`
 
 await $`git push`
 await $`git push --tags`
+await $`zx ${DIR}/grabthar-flatten`
