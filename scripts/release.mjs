@@ -11,3 +11,5 @@ DIST_TAG ?? (DIST_TAG = 'latest')
 
 let BUMP = process.argv.find(element => element.includes('BUMP='))?.replace('BUMP=', '')
 BUMP ?? (BUMP = 'patch')
+
+await $`npm version ${BUMP}`
