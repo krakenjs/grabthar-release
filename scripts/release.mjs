@@ -24,3 +24,6 @@ NPM_TOKEN ?? (NPM_TOKEN = '')
 await $`NPM_TOKEN=${NPM_TOKEN} npm publish --tag ${DIST_TAG}`
 await $`git checkout package.json`
 await $`git checkout package-lock.json || echo 'Package lock not found'`
+
+const cwd = process.cwd()
+const local_version = require(`${cwd}/package.json`).version
