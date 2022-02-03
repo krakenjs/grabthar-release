@@ -35,4 +35,6 @@ const local_version = require(`${current_working_directory}/package.json`).versi
 await $`${DIR}/grabthar-verify-npm-publish ${local_version} ${DIST_TAG}`
 
 // update non-prod dist tags whenever the latest dist tag changes
-if (DIST_TAG === 'latest') await $`${DIR}/grabthar-activate LOCAL_VERSION=${local_version} CDNIFY=false TAGS='[test, local, stage]'`
+if (DIST_TAG === 'latest') {
+  await $`${DIR}/grabthar-activate LOCAL_VERSION=${local_version} CDNIFY=false TAGS='[test, local, stage]'`
+}
