@@ -1,19 +1,11 @@
 #!/usr/bin/env zx
-import { argv, cwd } from 'process';
+import { cwd } from 'process';
+import 'zx/globals';
 
 await $`set -e`;
 
 const DIR = __dirname;
-const args = {};
-
-for (const element of argv) {
-  if (element.includes('=')) {
-    const arg = element.split('=');
-    args[arg[0]] = arg[1];
-  }
-}
-
-let { DIST_TAG, BUMP, NPM_TOKEN } = args;
+let { DIST_TAG, BUMP, NPM_TOKEN } = argv;
 
 DIST_TAG ?? (DIST_TAG = 'latest');
 BUMP ?? (BUMP = 'patch');
