@@ -5,9 +5,9 @@ import 'zx/globals';
 const DIR = __dirname;
 let { DIST_TAG, BUMP, NPM_TOKEN } = argv;
 
-DIST_TAG ?? (DIST_TAG = 'latest');
-BUMP ?? (BUMP = 'patch');
-NPM_TOKEN ?? (NPM_TOKEN = '');
+DIST_TAG = DIST_TAG || 'latest';
+BUMP = BUMP || 'patch';
+NPM_TOKEN = NPM_TOKEN || '';
 
 await $`${DIR}/grabthar-validate-git`;
 await $`${DIR}/grabthar-validate-npm`;
