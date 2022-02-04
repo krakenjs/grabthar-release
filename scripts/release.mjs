@@ -2,8 +2,6 @@
 import { cwd } from 'process';
 import 'zx/globals';
 
-await $`set -e`;
-
 const DIR = __dirname;
 let { DIST_TAG, BUMP, NPM_TOKEN } = argv;
 
