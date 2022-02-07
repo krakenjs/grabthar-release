@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+
 import { cwd } from 'process';
 import 'zx/globals';
 
