@@ -7,3 +7,5 @@ try {
   console.log('ERROR: Cannot continue with unstaged or uncommitted changes');
   console.log(`Exit code: ${p.exitCode}`);
 }
+
+await $`npx check-node-version --node='>=14.13.1' --npm='>=6.14'`;
