@@ -3,8 +3,8 @@
 try {
   await $`git diff-files --quiet`;
   await $`git diff-index --quiet --cached HEAD`;
-} catch (p) {
-  throw new Error('ERROR: Cannot continue with unstaged or uncommitted changes');
+} catch (err) {
+  throw new Error(`Cannot continue with unstaged or uncommitted changes\nExit code: ${err.exitCode}`);
 }
 
 await $`npx check-node-version --node='>=14.13.1' --npm='>=6.14'`;
@@ -22,10 +22,10 @@ BASE_COMMIT = BASE_COMMIT.stdout;
 
 if (LOCAL_COMMIT !== REMOTE_COMMIT) {
   if (LOCAL_COMMIT === BASE_COMMIT) {
-    throw new Error('ERROR: Local repo behind upstream repo');
+    throw new Error('Local repo behind upstream repo');
   } else if (REMOTE_COMMIT === BASE_COMMIT) {
-    throw new Error('ERROR: Local repo ahead of upstream repo');
+    throw new Error('Local repo ahead of upstream repo');
   } else {
-    throw new Error('ERROR: Local repo diverged from upstream repo');
+    throw new Error('Local repo diverged from upstream repo');
   }
 }
