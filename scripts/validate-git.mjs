@@ -20,3 +20,13 @@ LOCAL_BRANCH = LOCAL_BRANCH.toString();
 LOCAL_COMMIT = LOCAL_COMMIT.toString();
 REMOTE_COMMIT = REMOTE_COMMIT.toString();
 BASE_COMMIT = BASE_COMMIT.toString();
+
+if (LOCAL_COMMIT !== REMOTE_COMMIT) {
+  if (LOCAL_COMMIT === BASE_COMMIT) {
+    throw new Error('ERROR: Local repo behind upstream repo');
+  } else if (REMOTE_COMMIT === BASE_COMMIT) {
+    throw new Error('ERROR: Local repo ahead of upstream repo');
+  } else {
+    throw new Error('ERROR: Local repo diverged from upstream repo');
+  }
+}
