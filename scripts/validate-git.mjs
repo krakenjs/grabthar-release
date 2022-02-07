@@ -11,7 +11,12 @@ try {
 await $`npx check-node-version --node='>=14.13.1' --npm='>=6.14'`;
 
 const UPSTREAM = 'origin';
-const LOCAL_BRANCH = await $`git rev-parse --abbrev-ref HEAD`;
-const LOCAL_COMMIT = await $`git rev-parse HEAD`;
-const REMOTE_COMMIT = await $`git rev-parse "${UPSTREAM}"/"${LOCAL_BRANCH}"`;
-const BASE_COMMIT = await $`git merge-base HEAD "${UPSTREAM}"/"${LOCAL_BRANCH}"`;
+let LOCAL_BRANCH = await $`git rev-parse --abbrev-ref HEAD`;
+let LOCAL_COMMIT = await $`git rev-parse HEAD`;
+let REMOTE_COMMIT = await $`git rev-parse "${UPSTREAM}"/"${LOCAL_BRANCH}"`;
+let BASE_COMMIT = await $`git merge-base HEAD "${UPSTREAM}"/"${LOCAL_BRANCH}"`;
+
+LOCAL_BRANCH = LOCAL_BRANCH.toString();
+LOCAL_COMMIT = LOCAL_COMMIT.toString();
+REMOTE_COMMIT = REMOTE_COMMIT.toString();
+BASE_COMMIT = BASE_COMMIT.toString();
