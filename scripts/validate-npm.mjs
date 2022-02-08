@@ -25,3 +25,15 @@ let org;
 if (PACKAGE.name.indexOf('@') === 0) {
   org = PACKAGE.name.split('/')[0].slice(1);
 }
+
+if (org && !NPM_TOKEN) {
+  const { stdout: USER_ROLE } = await $`npm org ls ${org} ${whoAmI} --json`;
+  console.log('User role: ', USER_ROLE);
+
+  const PERMISSION = USER_ROLE.includes('developer') ? 'developer' : 'owner';
+  console.log('Permission: ', PERMISSION);
+
+  if (PERMISSION !== 'developer' && PERMISSION !== 'owner') {
+    throw new Error(`You must be assigned the developer or owner role in the npm ${org} org to publish.`);
+  }
+}
