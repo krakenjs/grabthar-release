@@ -20,8 +20,8 @@ await $`NPM_TOKEN=${NPM_TOKEN} npm publish --tag ${DIST_TAG}`;
 await $`git checkout package.json`;
 await $`git checkout package-lock.json || echo 'Package lock not found'`;
 
-const current_working_directory = cwd();
-const { version: local_version } = require(`${current_working_directory}/package.json`);
+const CWD = cwd();
+const { version: local_version } = require(`${CWD}/package.json`);
 
 await $`${DIR}/grabthar-verify-npm-publish ${local_version} ${DIST_TAG}`;
 
