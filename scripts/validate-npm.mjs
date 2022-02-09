@@ -28,9 +28,8 @@ if (PACKAGE.name.indexOf('@') === 0) {
 
 if (org && !NPM_TOKEN) {
   const { stdout: USER_ROLE } = await $`npm org ls ${org} ${whoAmI} --json`;
-  const PERMISSION = USER_ROLE.includes('developer') ? 'developer' : 'owner';
 
-  if (PERMISSION !== 'developer' && PERMISSION !== 'owner') {
+  if (!USER_ROLE.includes('developer') && !USER_ROLE.includes('owner')) {
     throw new Error(`You must be assigned the developer or owner role in the npm ${org} org to publish.`);
   }
 }
