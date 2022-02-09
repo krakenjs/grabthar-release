@@ -2,7 +2,7 @@
 
 import { cwd, env } from 'process';
 
-const NPM_TOKEN = env.NPM_TOKEN;
+const { NPM_TOKEN } = env;
 let whoAmI;
 
 if (NPM_TOKEN) {
