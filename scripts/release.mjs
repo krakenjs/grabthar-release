@@ -21,11 +21,11 @@ await $`git checkout package.json`;
 await $`git checkout package-lock.json || echo 'Package lock not found'`;
 
 const CWD = cwd();
-const { version: local_version } = require(`${CWD}/package.json`);
+const { version: LOCAL_VERSION } = require(`${CWD}/package.json`);
 
-await $`${DIR}/grabthar-verify-npm-publish ${local_version} ${DIST_TAG}`;
+await $`${DIR}/grabthar-verify-npm-publish --LOCAL_VERSION=${LOCAL_VERSION} --DIST_TAG=${DIST_TAG}`;
 
 // update non-prod dist tags whenever the latest dist tag changes
 if (DIST_TAG === 'latest') {
-  await $`${DIR}/grabthar-activate --LOCAL_VERSION=${local_version} --CDNIFY=false --TAGS=test,local,stage`;
+  await $`${DIR}/grabthar-activate --LOCAL_VERSION=${LOCAL_VERSION} --CDNIFY=false --TAGS=test,local,stage`;
 }
