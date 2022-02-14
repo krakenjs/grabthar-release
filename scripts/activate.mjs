@@ -3,7 +3,8 @@
 import { cwd } from 'process';
 import 'zx/globals';
 
-const { LOCAL_VERSION, CDNIFY, TAGS } = argv;
+let { LOCAL_VERSION, CDNIFY } = argv;
+const { TAGS } = argv;
 const DIR = __dirname;
 const TAG = 'active';
 const DEFENVS = ['test', 'local', 'stage', 'sandbox', 'production'];
