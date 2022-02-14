@@ -4,7 +4,7 @@ import { cwd } from 'process';
 import 'zx/globals';
 
 let { LOCAL_VERSION, CDNIFY } = argv;
-const { TAGS } = argv;
+const { ENVS } = argv;
 const DIR = __dirname;
 const TAG = 'active';
 const DEFENVS = ['test', 'local', 'stage', 'sandbox', 'production'];
