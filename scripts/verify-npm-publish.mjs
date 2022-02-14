@@ -19,8 +19,23 @@ console.table([{
 }]);
 
 const interval = 5;
+const max_time = 300;
+let counter = 0;
 
 await $`sleep ${interval}`;
 
-const npm_public_registry_version = await $`npm view "${PACKAGE_NAME}" "dist-tags.${DIST_TAG}"`;
+let { stdout: npm_public_registry_version } = await $`npm view "${PACKAGE_NAME}" "dist-tags.${DIST_TAG}"`;
+npm_public_registry_version = npm_public_registry_version.replace(/(\r\n|\n|\r)/gm, '');
 console.log(`npm version: ${npm_public_registry_version}`);
+
+while (LOCAL_VERSION !== npm_public_registry_version) {
+  if (counter === max_time) {
+    throw new Error(`Failed to verify version in ${max_time} seconds.`);
+  }
+  console.log(`Version mismatch between local version ${LOCAL_VERSION} and npm version ${npm_public_registry_version}. Trying again in ${interval} seconds...`);
+  await $`sleep ${interval}`;
+  npm_public_registry_version = await $`npm view "${PACKAGE_NAME}" "dist-tags.${DIST_TAG}"`;
+  counter += interval;
+}
+
+console.log('Successful version match.');
