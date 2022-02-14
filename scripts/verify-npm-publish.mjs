@@ -6,7 +6,7 @@ import 'zx/globals';
 const { DIST_TAG, LOCAL_VERSION } = argv;
 
 if (!DIST_TAG || !LOCAL_VERSION) {
-  throw new Error('Invalid arguments. Expected <version> and <dist-tag>.');
+  throw new Error('Invalid arguments. Expected <LOCAL_VERSION> and <DIST_TAG>.');
 }
 
 const CWD = cwd();
