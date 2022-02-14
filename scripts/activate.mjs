@@ -17,3 +17,7 @@ await $`${DIR}/grabthar-validate-npm`;
 if (!LOCAL_VERSION) {
   LOCAL_VERSION = await $`npm view ${MODULE} version`;
 }
+
+if (!CDNIFY) {
+  CDNIFY = true;
+}
