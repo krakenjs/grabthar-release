@@ -17,3 +17,10 @@ console.table([{
   'dist-tag': DIST_TAG,
   'local version': LOCAL_VERSION
 }]);
+
+const interval = 5;
+
+await $`sleep ${interval}`;
+
+const npm_public_registry_version = await $`npm view "${PACKAGE_NAME}" "dist-tags.${DIST_TAG}"`;
+console.log(`npm version: ${npm_public_registry_version}`);
