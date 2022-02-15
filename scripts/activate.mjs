@@ -35,7 +35,7 @@ if (!ENVS) {
 let twoFactorCode;
 
 if (!NPM_TOKEN) {
-  twoFactorCode = await $`read -p "NPM 2FA Code: " twofactorcode; echo $twofactorcode;`;
+  twoFactorCode = await $`read -p "NPM 2FA Code: " twofactorcode; echo $twofactorcode`;
   twoFactorCode = twoFactorCode.stdout.replace(/(\r\n|\n|\r)/gm, '');
 }
 
