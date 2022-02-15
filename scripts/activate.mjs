@@ -3,7 +3,7 @@
 import { cwd } from 'process';
 import 'zx/globals';
 
-let { LOCAL_VERSION, CDNIFY, ENVS } = argv;
+let { LOCAL_VERSION, CDNIFY, ENVS, NPM_TOKEN } = argv;
 const DIR = __dirname;
 const TAG = 'active';
 const DEFENVS = ['test', 'local', 'stage', 'sandbox', 'production'];
@@ -30,4 +30,15 @@ if (!ENVS) {
       throw new Error(`Invalid env: ${env}`);
     }
   }
+}
+
+let IS_NPM_OTP = false;
+
+if (!NPM_TOKEN) {
+  IS_NPM_OTP = true;
+}
+
+if (IS_NPM_OTP) {
+  let { stdout: twoFactorCode } = await $`read -p "NPM 2FA Code: " twofactorcode; echo $twofactorcode;`;
+  twoFactorCode = twoFactorCode.replace(/(\r\n|\n|\r)/gm, '');
 }
