@@ -1,9 +1,10 @@
 #!/usr/bin/env zx
 
-import { cwd } from 'process';
+import { cwd, env } from 'process';
 import 'zx/globals';
 
-let { LOCAL_VERSION, CDNIFY, ENVS, NPM_TOKEN } = argv;
+const { NPM_TOKEN } = env;
+let { LOCAL_VERSION, CDNIFY, ENVS } = argv;
 const DIR = __dirname;
 const TAG = 'active';
 const DEFENVS = ['test', 'local', 'stage', 'sandbox', 'production'];

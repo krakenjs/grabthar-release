@@ -1,14 +1,14 @@
 #!/usr/bin/env zx
 
-import { cwd } from 'process';
+import { cwd, env } from 'process';
 import 'zx/globals';
 
+const { NPM_TOKEN } = env;
 const DIR = __dirname;
-let { DIST_TAG, BUMP, NPM_TOKEN } = argv;
+let { DIST_TAG, BUMP } = argv;
 
 DIST_TAG = DIST_TAG || 'latest';
 BUMP = BUMP || 'patch';
-NPM_TOKEN = NPM_TOKEN || '';
 
 await $`${DIR}/grabthar-validate-git`;
 await $`${DIR}/grabthar-validate-npm`;
