@@ -54,3 +54,7 @@ for (let env of ENVS) {
     await $`NPM_TOKEN=${NPM_TOKEN} npm dist-tag add ${MODULE}@${LOCAL_VERSION} "${TAG}-${env}"`;
   }
 }
+
+for (let env of ENVS) {
+  await $`${DIR}/grabthar-verify-npm-publish "${LOCAL_VERSION}" "${TAG}-${env}"`;
+}
