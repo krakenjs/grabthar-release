@@ -27,5 +27,5 @@ await $`${DIR}/grabthar-verify-npm-publish --LOCAL_VERSION=${LOCAL_VERSION} --DI
 
 // update non-prod dist tags whenever the latest dist tag changes
 if (DIST_TAG === 'latest') {
-  await $`${DIR}/grabthar-activate --LOCAL_VERSION=${LOCAL_VERSION} --CDNIFY=false --TAGS=test,local,stage`;
+  await $`${DIR}/grabthar-activate --LOCAL_VERSION=${LOCAL_VERSION} --CDNIFY=false --ENVS=test,local,stage`;
 }
