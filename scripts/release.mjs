@@ -3,12 +3,13 @@
 import { cwd, env } from 'process';
 import 'zx/globals';
 
-const { NPM_TOKEN } = env;
+let { NPM_TOKEN } = env;
 const DIR = __dirname;
 let { DIST_TAG, BUMP } = argv;
 
 DIST_TAG = DIST_TAG || 'latest';
 BUMP = BUMP || 'patch';
+NPM_TOKEN = NPM_TOKEN || '';
 
 await $`${DIR}/grabthar-validate-git`;
 await $`${DIR}/grabthar-validate-npm`;
