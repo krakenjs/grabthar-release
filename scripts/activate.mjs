@@ -32,21 +32,15 @@ if (!ENVS) {
   }
 }
 
-let IS_NPM_OTP = false;
-
-if (!NPM_TOKEN) {
-  IS_NPM_OTP = true;
-}
-
 let twoFactorCode;
 
-if (IS_NPM_OTP) {
+if (!NPM_TOKEN) {
   twoFactorCode = await $`read -p "NPM 2FA Code: " twofactorcode; echo $twofactorcode;`;
   twoFactorCode = twoFactorCode.stdout.replace(/(\r\n|\n|\r)/gm, '');
 }
 
 for (let env of ENVS) {
-  if (IS_NPM_OTP) {
+  if (!NPM_TOKEN) {
     console.log(`npm dist-tag add ${MODULE}@${LOCAL_VERSION} "${TAG}-${env}" --otp="${twoFactorCode}"`);
     await $`npm dist-tag add ${MODULE}@${LOCAL_VERSION} "${TAG}-${env}" --otp="${twoFactorCode}"`;
   } else {
