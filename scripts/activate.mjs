@@ -38,7 +38,9 @@ if (!NPM_TOKEN) {
   IS_NPM_OTP = true;
 }
 
+let twoFactorCode;
+
 if (IS_NPM_OTP) {
-  let { stdout: twoFactorCode } = await $`read -p "NPM 2FA Code: " twofactorcode; echo $twofactorcode;`;
-  twoFactorCode = twoFactorCode.replace(/(\r\n|\n|\r)/gm, '');
+  twoFactorCode = await $`read -p "NPM 2FA Code: " twofactorcode; echo $twofactorcode;`;
+  twoFactorCode = twoFactorCode.stdout.replace(/(\r\n|\n|\r)/gm, '');
 }
