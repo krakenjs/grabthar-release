@@ -18,7 +18,7 @@ if (!LOCAL_VERSION) {
 }
 
 if (!CDNIFY) {
-  CDNIFY = true;
+  CDNIFY = 'true';
 }
 
 if (!ENVS) {
@@ -53,6 +53,6 @@ for (let env of ENVS) {
   await $`${DIR}/grabthar-verify-npm-publish "${LOCAL_VERSION}" "${TAG}-${env}"`;
 }
 
-if (CDNIFY) {
+if (CDNIFY === 'true') {
   await $`${DIR}/grabthar-cdnify`;
 }
