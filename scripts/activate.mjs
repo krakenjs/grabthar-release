@@ -51,7 +51,7 @@ for (let env of ENVS) {
 }
 
 for (let env of ENVS) {
-  await $`${DIR}/grabthar-verify-npm-publish "${LOCAL_VERSION}" "${TAG}-${env}"`;
+  await $`${DIR}/grabthar-verify-npm-publish --LOCAL_VERSION=${LOCAL_VERSION} --DIST_TAG=${TAG}-${env}`;
 }
 
 if (CDNIFY === 'true') {
