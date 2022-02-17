@@ -1,45 +1,48 @@
 #!/usr/bin/env zx
+/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-sync: off, import/no-commonjs: off */
 
 import { cwd } from 'process';
 
+import { $ } from 'zx';
+
 const DIR = __dirname;
 
-await $`${DIR}/grabthar-validate-git`;
-await $`${DIR}/grabthar-validate-flat`;
+await $`${ DIR }/grabthar-validate-git`;
+await $`${ DIR }/grabthar-validate-flat`;
 
 const fs = require('fs');
+
 const CWD = cwd();
-const PACKAGE = `${CWD}/package.json`;
-const PACKAGE_LOCK = `${CWD}/package-lock.json`;
+const PACKAGE = `${ CWD }/package.json`;
+const PACKAGE_LOCK = `${ CWD }/package-lock.json`;
 
 if (!fs.existsSync(PACKAGE)) {
-  throw new Error('Expected package.json to be present.');
+    throw new Error('Expected package.json to be present.');
 }
 
 if (!fs.existsSync(PACKAGE_LOCK)) {
-  console.log('Error: Expected package-lock.json to be present.');
-  process.exit(0);
+    throw new Error('Expected package-lock.json to be present.');
 }
 
-let pkg = require(PACKAGE);
-let pkgLock = require(PACKAGE_LOCK);
+const pkg = require(PACKAGE);
+const pkgLock = require(PACKAGE_LOCK);
 
-let flattenedDependencies = {};
+const flattenedDependencies = {};
 
-for (let depName of Object.keys(pkgLock.dependencies)) {
-  let dep = pkgLock.dependencies[depName];
+for (const depName of Object.keys(pkgLock.dependencies)) {
+    const dep = pkgLock.dependencies[depName];
 
-  if (dep.dev) {
-    continue;
-  }
+    if (dep.dev) {
+        continue;
+    }
 
-  flattenedDependencies[depName] = dep.version;
+    flattenedDependencies[depName] = dep.version;
 }
 
-for (let depName of Object.keys(pkg.dependencies)) {
-  if (!pkg.dependencies[depName].match(/^\d+\.\d+\.\d+$/)) {
-    throw new Error('Invalid dependency: ' + depName + '@' + pkg.dependencies[depName]);
-  }
+for (const depName of Object.keys(pkg.dependencies)) {
+    if (!pkg.dependencies[depName].match(/^\d+\.\d+\.\d+$/)) {
+        throw new Error(`Invalid dependency: ${  depName  }@${  pkg.dependencies[depName] }`);
+    }
 }
 
 pkg.dependencies = flattenedDependencies;
