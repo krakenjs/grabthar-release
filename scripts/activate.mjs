@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { createRequire } from 'module';
 
-import { $, argv } from 'zx';
+import { $, argv, question } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
 const filename = fileURLToPath(moduleMetaUrl);
@@ -24,6 +24,7 @@ await $`${ DIR }/grabthar-validate-npm`;
 
 if (!LOCAL_VERSION) {
     LOCAL_VERSION = await $`npm view ${ MODULE } version`;
+    LOCAL_VERSION = LOCAL_VERSION?.stdout.trim();
 }
 
 if (!CDNIFY) {
@@ -44,8 +45,7 @@ if (!ENVS) {
 let twoFactorCode;
 
 if (!NPM_TOKEN) {
-    twoFactorCode = await $`read -p "NPM 2FA Code: " twofactorcode; echo $twofactorcode`;
-    twoFactorCode = twoFactorCode.stdout.replace(/(\r\n|\n|\r)/gm, '');
+    twoFactorCode = await question('NPM 2FA Code: ');
 }
 
 for (const environment of ENVS) {
