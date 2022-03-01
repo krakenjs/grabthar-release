@@ -1,4 +1,4 @@
-#!/usr/bin/env zx
+#!/usr/bin/env node
 /* eslint flowtype/require-valid-file-annotation: off */
 
 import { $ } from 'zx';

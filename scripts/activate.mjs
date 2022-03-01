@@ -1,13 +1,19 @@
-#!/usr/bin/env zx
+#!/usr/bin/env node
 /* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-console: off */
 
 import { cwd, env } from 'process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { createRequire } from 'module';
 
 import { $, argv } from 'zx';
 
+const moduleMetaUrl = import.meta.url;
+const filename = fileURLToPath(moduleMetaUrl);
+const DIR = dirname(filename);
+const require = createRequire(moduleMetaUrl);
 const { NPM_TOKEN } = env;
 let { LOCAL_VERSION, CDNIFY, ENVS } = argv;
-const DIR = __dirname;
 const TAG = 'active';
 const DEFENVS = [ 'test', 'local', 'stage', 'sandbox', 'production' ];
 const CWD = cwd();

@@ -1,10 +1,13 @@
-#!/usr/bin/env zx
+#!/usr/bin/env node
 /* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-console: off */
 
 import { cwd, env } from 'process';
+import { createRequire } from 'module';
 
 import { $ } from 'zx';
 
+const moduleMetaUrl = import.meta.url;
+const require = createRequire(moduleMetaUrl);
 const { NPM_TOKEN } = env;
 let whoAmI;
 

@@ -1,11 +1,17 @@
-#!/usr/bin/env zx
+#!/usr/bin/env node
 /* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-sync: off, import/no-commonjs: off */
 
 import { cwd } from 'process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { createRequire } from 'module';
 
 import { $ } from 'zx';
 
-const DIR = __dirname;
+const moduleMetaUrl = import.meta.url;
+const filename = fileURLToPath(moduleMetaUrl);
+const DIR = dirname(filename);
+const require = createRequire(moduleMetaUrl);
 
 await $`${ DIR }/grabthar-validate-git`;
 await $`${ DIR }/grabthar-validate-flat`;
