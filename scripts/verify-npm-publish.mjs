@@ -31,7 +31,7 @@ let counter = 0;
 await $`sleep ${ interval }`;
 
 let { stdout: npm_public_registry_version } = await $`npm view "${ PACKAGE_NAME }" "dist-tags.${ DIST_TAG }"`;
-npm_public_registry_version = npm_public_registry_version.replace(/(\r\n|\n|\r)/gm, '');
+npm_public_registry_version = npm_public_registry_version.trim();
 console.log(`npm version: ${ npm_public_registry_version }`);
 
 while (LOCAL_VERSION !== npm_public_registry_version) {
