@@ -2,15 +2,11 @@
 /* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-console: off */
 
 import { cwd, env } from 'process';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { createRequire } from 'module';
 
 import { $, argv, question } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
-const filename = fileURLToPath(moduleMetaUrl);
-const DIR = dirname(filename);
 const require = createRequire(moduleMetaUrl);
 const { NPM_TOKEN } = env;
 let { LOCAL_VERSION, CDNIFY, ENVS } = argv;
@@ -19,8 +15,8 @@ const DEFENVS = [ 'test', 'local', 'stage', 'sandbox', 'production' ];
 const CWD = cwd();
 const { name: MODULE } = require(`${ CWD }/package.json`);
 
-await $`${ DIR }/grabthar-validate-git`;
-await $`${ DIR }/grabthar-validate-npm`;
+await $`grabthar-validate-git`;
+await $`grabthar-validate-npm`;
 
 if (!LOCAL_VERSION) {
     LOCAL_VERSION = await $`npm view ${ MODULE } version`;
@@ -59,9 +55,9 @@ for (const environment of ENVS) {
 }
 
 for (const environment of ENVS) {
-    await $`${ DIR }/grabthar-verify-npm-publish --LOCAL_VERSION=${ LOCAL_VERSION } --DIST_TAG=${ TAG }-${ environment }`;
+    await $`grabthar-verify-npm-publish --LOCAL_VERSION=${ LOCAL_VERSION } --DIST_TAG=${ TAG }-${ environment }`;
 }
 
 if (CDNIFY === 'true') {
-    await $`${ DIR }/grabthar-cdnify`;
+    await $`grabthar-cdnify`;
 }

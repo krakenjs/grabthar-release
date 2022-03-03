@@ -2,19 +2,15 @@
 /* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-sync: off, import/no-commonjs: off */
 
 import { cwd } from 'process';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { createRequire } from 'module';
 
 import { $ } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
-const filename = fileURLToPath(moduleMetaUrl);
-const DIR = dirname(filename);
 const require = createRequire(moduleMetaUrl);
 
-await $`${ DIR }/grabthar-validate-git`;
-await $`${ DIR }/grabthar-validate-flat`;
+await $`grabthar-validate-git`;
+await $`grabthar-validate-flat`;
 
 const fs = require('fs');
 
