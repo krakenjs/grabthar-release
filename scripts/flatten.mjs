@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-sync: off, import/no-commonjs: off */
+/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-sync: off, import/no-commonjs: off, no-process-exit: off */
 
 import { cwd } from 'process';
 import { createRequire } from 'module';
