@@ -23,7 +23,7 @@ if (!fs.existsSync(PACKAGE)) {
 }
 
 if (!fs.existsSync(PACKAGE_LOCK)) {
-    throw new Error('Expected package-lock.json to be present.');
+    process.exit(0);
 }
 
 const pkg = require(PACKAGE);
