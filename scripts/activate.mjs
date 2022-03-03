@@ -46,11 +46,11 @@ if (!NPM_TOKEN) {
 
 for (const environment of ENVS) {
     if (!NPM_TOKEN) {
-        console.log(`npm dist-tag add ${ MODULE }@${ LOCAL_VERSION } "${ TAG }-${ environment }" --otp="${ twoFactorCode }"`);
-        await $`npm dist-tag add ${ MODULE }@${ LOCAL_VERSION } "${ TAG }-${ environment }" --otp="${ twoFactorCode }"`;
+        console.log(`npm dist-tag add ${ MODULE }@${ LOCAL_VERSION } ${ TAG }-${ environment } --otp=${ twoFactorCode }`);
+        await $`npm dist-tag add ${ MODULE }@${ LOCAL_VERSION } ${ TAG }-${ environment } --otp=${ twoFactorCode }`;
     } else {
-        console.log(`npm dist-tag add ${ MODULE }@${ LOCAL_VERSION } "${ TAG }-${ environment }"`);
-        await $`NPM_TOKEN=${ NPM_TOKEN } npm dist-tag add ${ MODULE }@${ LOCAL_VERSION } "${ TAG }-${ environment }"`;
+        console.log(`npm dist-tag add ${ MODULE }@${ LOCAL_VERSION } ${ TAG }-${ environment }`);
+        await $`NPM_TOKEN=${ NPM_TOKEN } npm dist-tag add ${ MODULE }@${ LOCAL_VERSION } ${ TAG }-${ environment }`;
     }
 }
 
