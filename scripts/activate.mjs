@@ -20,7 +20,7 @@ await $`grabthar-validate-npm`;
 
 if (!LOCAL_VERSION) {
     LOCAL_VERSION = await $`npm view ${ MODULE } version`;
-    LOCAL_VERSION = LOCAL_VERSION?.stdout.trim();
+    LOCAL_VERSION = LOCAL_VERSION.stdout.trim();
 }
 
 if (!CDNIFY) {
