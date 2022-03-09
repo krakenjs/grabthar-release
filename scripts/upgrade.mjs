@@ -45,3 +45,5 @@ if (!MODULE) {
 } else {
   await $`git commit -m "Update version of ${ MODULE }"`;
 }
+
+await $`git push`;
