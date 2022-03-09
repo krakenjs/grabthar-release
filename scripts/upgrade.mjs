@@ -34,3 +34,5 @@ if (!fs.existsSync(PACKAGE_LOCK)) {
 if (EXPERIMENTAL_DEPENDENCY_TEST === "1") {
   await $`grabthar-dependency-test`;
 }
+
+await $`grabthar-prune`;
