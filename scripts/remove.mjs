@@ -16,3 +16,7 @@ if (!MODULE) {
   }
   await $`npm uninstall ${ MODULE }`;
 }
+
+await $`rm -rf ./node_modules`;
+await $`$(which npm) install`;
+await $`npm test`;
