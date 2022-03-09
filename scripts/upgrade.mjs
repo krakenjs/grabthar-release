@@ -36,3 +36,6 @@ if (EXPERIMENTAL_DEPENDENCY_TEST === "1") {
 }
 
 await $`grabthar-prune`;
+
+await $`git add package.json`;
+await $`git add package-lock.json`;
