@@ -8,3 +8,5 @@ try {
 } catch (err) {
     throw new Error(`Cannot continue with unstaged or uncommitted changes\nExit code: ${ err.exitCode }`);
 }
+
+await $`npm test`;
