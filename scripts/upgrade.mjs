@@ -39,3 +39,9 @@ await $`grabthar-prune`;
 
 await $`git add package.json`;
 await $`git add package-lock.json`;
+
+if (!MODULE) {
+  await $`git commit -m "Update version of all modules"`;
+} else {
+  await $`git commit -m "Update version of ${ MODULE }"`;
+}
