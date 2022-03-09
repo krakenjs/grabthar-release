@@ -35,3 +35,7 @@ if (!fs.existsSync(PACKAGE_LOCK)) {
 
 await $`git add package.json`;
 await $`git add package-lock.json`;
+
+await $`git commit -m "Remove ${ MODULE }"`;
+
+await $`git push`;
