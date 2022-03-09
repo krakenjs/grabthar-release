@@ -32,3 +32,6 @@ const PACKAGE_LOCK = `${ CWD }/package-lock.json`;
 if (!fs.existsSync(PACKAGE_LOCK)) {
   throw new Error('Expected package-lock.json to be generated - are you using npm5+?');
 }
+
+await $`git add package.json`;
+await $`git add package-lock.json`;
