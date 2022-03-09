@@ -28,3 +28,13 @@ if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
 } else {
   await $`npm version ${ BUMP }`;
 }
+
+// Push and publish!
+await $`git push`;
+
+if (TAG === 'alpha') {
+  await $`npm publish --tag ${ TAG }`;
+} else {
+  await $`git push --tags`;
+  await $`npm publish --tag ${ TAG }`;
+}
