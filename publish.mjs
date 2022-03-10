@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint flowtype/require-valid-file-annotation: off */
 
 import { $ } from 'zx';
 
@@ -22,19 +23,19 @@ let { stdout: DEFAULT_BRANCH } = await $`git remote show origin | sed -n '/HEAD 
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
-  BUMP = 'prerelease';
-  TAG = 'alpha';
-  await $`npm --no-git-tag-version version ${ BUMP } --preid=${ TAG }`;
+    BUMP = 'prerelease';
+    TAG = 'alpha';
+    await $`npm --no-git-tag-version version ${ BUMP } --preid=${ TAG }`;
 } else {
-  await $`npm version ${ BUMP }`;
+    await $`npm version ${ BUMP }`;
 }
 
 // Push and publish!
 await $`git push`;
 
 if (TAG === 'alpha') {
-  await $`npm publish --tag ${ TAG }`;
+    await $`npm publish --tag ${ TAG }`;
 } else {
-  await $`git push --tags`;
-  await $`npm publish --tag ${ TAG }`;
+    await $`git push --tags`;
+    await $`npm publish --tag ${ TAG }`;
 }
