@@ -20,7 +20,7 @@ if (!MODULE) {
 }
 
 await $`rm -rf ./node_modules`;
-await $`rm -f ./package-lock.json;`;
+await $`rm -f ./package-lock.json`;
 
 await $`npm install`;
 await $`npm test`;
