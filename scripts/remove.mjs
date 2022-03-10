@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+/* eslint flowtype/require-valid-file-annotation: off, import/no-commonjs: off, no-sync: off */
 
-import { $, argv } from 'zx';
 import { cwd } from 'process';
 import { createRequire } from 'module';
+
+import { $, argv } from 'zx';
 
 const { MODULE } = argv;
 const CWD = cwd();
@@ -13,14 +15,14 @@ const fs = require('fs');
 await $`grabthar-validate-git`;
 
 if (!MODULE) {
-  throw new Error('Please provide a module name to remove');
+    throw new Error('Please provide a module name to remove');
 } else {
-  try {
-    await $`npm ls ${ MODULE }`
-  } catch (error) {
-    throw new Error(`${ MODULE } is not currently a dependency`);
-  }
-  await $`npm uninstall ${ MODULE }`;
+    try {
+        await $`npm ls ${ MODULE }`;
+    } catch (error) {
+        throw new Error(`${ MODULE } is not currently a dependency`);
+    }
+    await $`npm uninstall ${ MODULE }`;
 }
 
 await $`rm -rf ./node_modules`;
@@ -30,7 +32,7 @@ await $`npm test`;
 const PACKAGE_LOCK = `${ CWD }/package-lock.json`;
 
 if (!fs.existsSync(PACKAGE_LOCK)) {
-  throw new Error('Expected package-lock.json to be generated - are you using npm5+?');
+    throw new Error('Expected package-lock.json to be generated - are you using npm5+?');
 }
 
 await $`git add package.json`;
