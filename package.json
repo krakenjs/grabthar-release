@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "flow-typed": "rm -rf ./flow-typed && flow-typed install",
-    "lint": "eslint scripts/",
+    "lint": "eslint scripts/ --ext .js,.mjs",
     "flow": "flow check",
     "test": "npm run lint && npm run flow-typed && npm run flow",
     "babel": "babel scripts --ignore=node_modules --out-dir scripts --source-maps inline",
@@ -14,18 +14,18 @@
     "postinstall": "npm_config_registry=https://npm.paypal.com npm install @paypalcorp/web --no-save --proxy='null' --https-proxy='null' || echo 'Unable to install cdnx cli tools'"
   },
   "bin": {
-    "grabthar-activate": "./scripts/activate.sh",
+    "grabthar-activate": "./scripts/activate.mjs",
     "grabthar-add": "./scripts/add.sh",
     "grabthar-cdnify": "./scripts/cdnify.js",
-    "grabthar-flatten": "./scripts/flatten.sh",
+    "grabthar-flatten": "./scripts/flatten.mjs",
     "grabthar-prune": "./scripts/prune.js",
-    "grabthar-release": "./scripts/release.sh",
+    "grabthar-release": "./scripts/release.mjs",
     "grabthar-remove": "./scripts/remove.sh",
     "grabthar-upgrade": "./scripts/upgrade.sh",
-    "grabthar-validate-git": "./scripts/validate-git.sh",
-    "grabthar-validate-npm": "./scripts/validate-npm.sh",
+    "grabthar-validate-git": "./scripts/validate-git.mjs",
+    "grabthar-validate-npm": "./scripts/validate-npm.mjs",
     "grabthar-validate-flat": "./scripts/validate-flat.js",
-    "grabthar-verify-npm-publish": "./scripts/verify-npm-publish.sh",
+    "grabthar-verify-npm-publish": "./scripts/verify-npm-publish.mjs",
     "grabthar-dependency-test": "./scripts/dependency-test.js",
     "grabthar-utils.js": "./scripts/grabthar-utils.js"
   },
@@ -33,7 +33,7 @@
     "scripts"
   ],
   "engines": {
-    "node": ">=12",
+    "node": ">=14.13.1",
     "npm": ">=6"
   },
   "config": {
@@ -67,13 +67,14 @@
     "download": "^8.0.0",
     "flow-bin": "0.131.0",
     "fs-extra": "^5.0.0",
-    "grumbler-scripts": "^5",
+    "grumbler-scripts": "^6",
     "https-proxy-agent": "^5.0.0",
     "inquirer": "^7.3.2",
     "libnpmconfig": "^1.2.1",
     "node-fetch": "^2.6.0",
     "npm": "^6.14.0",
     "parse-diff": "^0.8.1",
-    "shelljs": "^0.8.4"
+    "shelljs": "^0.8.4",
+    "zx": "4.3.0"
   }
 }
