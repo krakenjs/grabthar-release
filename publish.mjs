@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* eslint flowtype/require-valid-file-annotation: off */
 
-import { $ } from 'zx';
+import { $, question } from 'zx';
 
 try {
     await $`git diff-files --quiet`;
@@ -33,9 +33,11 @@ if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
 // Push and publish!
 await $`git push`;
 
+const twoFactorCode = await question('NPM 2FA Code: ');
+
 if (TAG === 'alpha') {
-    await $`npm publish --tag ${ TAG }`;
+    await $`npm publish --tag ${ TAG } --otp ${ twoFactorCode }`;
 } else {
     await $`git push --tags`;
-    await $`npm publish --tag ${ TAG }`;
+    await $`npm publish --tag ${ TAG } --otp ${ twoFactorCode }`;
 }
