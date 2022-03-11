@@ -27,7 +27,7 @@ jobs:
           git config --global user.name ${{ github.actor }}
 
       - name: Publish to npm
-        run: ./publish.mjs
+        run: npm run publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
