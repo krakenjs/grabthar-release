@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /* eslint flowtype/require-valid-file-annotation: off */
 
-import { $ } from 'zx';
+import { env } from 'process';
+
+import { $, question } from 'zx';
 
 try {
     await $`git diff-files --quiet`;
@@ -16,6 +18,7 @@ await $`npm test`;
 
 let BUMP = 'patch';
 let TAG = 'latest';
+const { NPM_TOKEN } = env;
 
 let { stdout: CURRENT_BRANCH } = await $`git rev-parse --abbrev-ref HEAD`;
 CURRENT_BRANCH = CURRENT_BRANCH.trim();
@@ -33,9 +36,21 @@ if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
 // Push and publish!
 await $`git push`;
 
-if (TAG === 'alpha') {
-    await $`npm publish --tag ${ TAG }`;
+let twoFactorCode;
+
+if (NPM_TOKEN) {
+    if (TAG === 'alpha') {
+        await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --tag ${ TAG }`;
+    } else {
+        await $`git push --tags`;
+        await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --tag ${ TAG }`;
+    }
 } else {
-    await $`git push --tags`;
-    await $`npm publish --tag ${ TAG }`;
+    twoFactorCode = await question('NPM 2FA Code: ');
+    if (TAG === 'alpha') {
+        await $`npm publish --tag ${ TAG } --otp ${ twoFactorCode }`;
+    } else {
+        await $`git push --tags`;
+        await $`npm publish --tag ${ TAG } --otp ${ twoFactorCode }`;
+    }
 }
