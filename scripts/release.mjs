@@ -4,12 +4,13 @@
 import { cwd, env } from 'process';
 import { createRequire } from 'module';
 
-import { $, argv } from 'zx';
+import { $, argv, question } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
 let { NPM_TOKEN } = env;
 let { DIST_TAG, BUMP } = argv;
+let twoFactorCode;
 
 DIST_TAG = DIST_TAG || 'latest';
 BUMP = BUMP || 'patch';
@@ -21,7 +22,14 @@ await $`npm version ${ BUMP }`;
 await $`git push`;
 await $`git push --tags`;
 await $`grabthar-flatten`;
-await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --tag ${ DIST_TAG }`;
+
+if (NPM_TOKEN) {
+    await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --tag ${ DIST_TAG }`;
+} else {
+    twoFactorCode = await question('NPM 2FA Code: ');
+    await $`npm publish --tag ${ DIST_TAG } --otp ${ twoFactorCode }`;
+}
+
 await $`git checkout package.json`;
 await $`git checkout package-lock.json || echo 'Package lock not found'`;
 
