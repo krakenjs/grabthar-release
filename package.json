@@ -12,7 +12,7 @@
     "prepublishOnly": "npm run babel",
     "postpublish": "git checkout ./scripts",
     "postinstall": "npm_config_registry=https://npm.paypal.com npm install @paypalcorp/web --no-save --proxy='null' --https-proxy='null' || echo 'Unable to install cdnx cli tools'",
-    "publish-npm": "./publish.mjs"
+    "release": "./publish.mjs"
   },
   "bin": {
     "grabthar-activate": "./scripts/activate.mjs",
