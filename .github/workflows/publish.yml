@@ -19,7 +19,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: 📥 Download deps
-        run: npm run reinstall
+        uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
 
       - name: Configure git user
         run: |
