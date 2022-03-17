@@ -4,16 +4,15 @@
 import { cwd, env } from 'process';
 import { createRequire } from 'module';
 
-import { $, argv, question } from 'zx';
+import { $, question } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
 let { NPM_TOKEN } = env;
-let { DIST_TAG, BUMP } = argv;
+let BUMP = 'patch';
+let DIST_TAG = 'latest';
 let twoFactorCode;
 
-DIST_TAG = DIST_TAG || 'latest';
-BUMP = BUMP || 'patch';
 NPM_TOKEN = NPM_TOKEN || '';
 
 await $`grabthar-validate-git`;
