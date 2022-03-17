@@ -22,7 +22,15 @@ DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
 await $`grabthar-validate-git`;
 await $`grabthar-validate-npm`;
-await $`npm version ${ BUMP }`;
+
+if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
+    BUMP = 'prerelease';
+    DIST_TAG = 'alpha';
+    await $`npm version ${ BUMP }`;
+} else {
+    await $`npm version ${ BUMP }`;
+}
+
 await $`git push`;
 await $`git push --tags`;
 await $`grabthar-flatten`;
