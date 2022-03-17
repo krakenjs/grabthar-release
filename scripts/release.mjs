@@ -28,11 +28,9 @@ await $`grabthar-validate-npm`;
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
     BUMP = 'prerelease';
     DIST_TAG = 'alpha';
-    await $`npm version ${ BUMP }`;
-} else {
-    await $`npm version ${ BUMP }`;
 }
 
+await $`npm version ${ BUMP }`;
 await $`git push`;
 await $`git push --tags`;
 await $`grabthar-flatten`;
