@@ -15,6 +15,11 @@ let twoFactorCode;
 
 NPM_TOKEN = NPM_TOKEN || '';
 
+let { stdout: CURRENT_BRANCH } = await $`git rev-parse --abbrev-ref HEAD`;
+CURRENT_BRANCH = CURRENT_BRANCH.trim();
+let { stdout: DEFAULT_BRANCH } = await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
+DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
+
 await $`grabthar-validate-git`;
 await $`grabthar-validate-npm`;
 await $`npm version ${ BUMP }`;
