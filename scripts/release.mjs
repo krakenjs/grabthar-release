@@ -4,7 +4,7 @@
 import { cwd, env } from 'process';
 import { createRequire } from 'module';
 
-import { $, question } from 'zx';
+import { $, question, fetch } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
@@ -16,14 +16,30 @@ let BUMP = 'patch';
 let DIST_TAG = 'latest';
 let twoFactorCode;
 
+const CWD = cwd();
+const { version: LOCAL_VERSION } = require(`${ CWD }/package.json`);
+
 let { stdout: REMOTE_URL } = await $`git config --get remote.origin.url`;
 REMOTE_URL = REMOTE_URL.trim();
 
-const CWD = cwd();
-const { version: LOCAL_VERSION, repository: { url: REPO_URL } } = require(`${ CWD }/package.json`);
+if (REMOTE_URL.includes('.git')) {
+    REMOTE_URL = REMOTE_URL.replace('.git', '');
+}
 
-if (REMOTE_URL !== REPO_URL) {
-    throw new Error('The remote url does not match the repo url. Publishing from a fork is not allowed.');
+const isForked = async () => {
+    const { pathname } = new URL(`${ REMOTE_URL }`);
+    const data = await fetch(`https://api.github.com/repos${ pathname }`);
+    const jsonData = await data.json();
+    if (jsonData.message === 'Not Found') {
+        throw new Error('Repo not found via the GitHub Repos API.');
+    }
+    return jsonData;
+};
+
+const { fork } = await isForked();
+
+if (fork) {
+    throw new Error('Publishing from a fork is not allowed.');
 }
 
 // This will determine the type of release based on the git branch. When the default branch is used, it will be a `patch` that's published to npm under the `latest` dist-tag. Any other branch will be a `prelease` that's published to npm under the `alpha` dist-tag.
