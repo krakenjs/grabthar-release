@@ -33,12 +33,13 @@ const isForked = async () => {
     if (jsonData.message === 'Not Found') {
         throw new Error('Repo not found via the GitHub Repos API.');
     }
-    return jsonData;
+    const { fork } = jsonData;
+    return fork;
 };
 
-const { fork } = await isForked();
+const forked = await isForked();
 
-if (fork) {
+if (forked) {
     throw new Error('Publishing from a fork is not allowed.');
 }
 
