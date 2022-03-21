@@ -1,22 +1,23 @@
 /* @flow */
 import { join } from 'path';
+import { promises as fs } from 'fs';
 
-import { fs as memfs } from 'memfs';
 import mockArgv from 'mock-argv';
 import fetchMock from 'node-fetch';
+import { exists, remove } from 'fs-extra';
 
 import { run } from '../scripts/cdnify';
 import { clearInfoCache } from '../scripts/grabthar-utils';
 
-
-const { promises: fs } = memfs;
-
 jest.mock('fs', () => require('memfs').fs);
 jest.mock('download', () => (url, folderPath, { filename })  => {
-    const filesystem = require('fs');
+    // jest mocks have this closure requirement where you can't access
+    // variables that exist outside of the mock. We have to re-import fs
+    // here instead of using the import fs from 'fs' at the top of the file
+    const fsInsideJestMock = require('fs').promises;
     const file = `${ folderPath }/${ filename }`;
 
-    return filesystem.promises.writeFile(file, 'tarball info');
+    return fsInsideJestMock.writeFile(file, 'tarball info');
 
 });
 jest.mock('node-fetch', () => require('fetch-mock-jest').sandbox());
@@ -25,19 +26,6 @@ jest.mock('shelljs', () => ({
         cb(0, []);
     })
 }));
-
-const exists = async (path) => {
-    let pathExists = false;
-
-    try {
-        await fs.stat(path);
-        pathExists = true;
-    } catch (_) {
-        // do nothing
-    }
-
-    return pathExists;
-};
 
 const mockNpmRequest = (packageName, infoJson) => {
     // $FlowFixMe node-fetch is mocked by fetch-mock-jest
@@ -84,8 +72,7 @@ describe('cdnify', () => {
         // $FlowFixMe
         fetchMock.resetHistory();
 
-        const cdnPath = join(process.cwd(), 'cdn');
-        await fs.rm(cdnPath, { recursive: true, force: true });
+        await remove(join(process.cwd(), 'cdn'));
     });
 
     describe('commitonly recursive', () => {
@@ -191,6 +178,243 @@ describe('cdnify', () => {
             expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
             expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
             expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(false);
+        });
+
+        test('should keep number of specified versions', async () => {
+            const releasePackage = createInfoPackage({
+                'name':      '@org/release-package',
+                'latest':   '6.0.0',
+                'distTags':  {
+                    'active-production': '5.0.0'
+                },
+                'versions': [
+                    createVersion({
+                        'version': '1.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version': '2.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version': '3.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version': '4.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version': '5.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version': '6.0.0',
+                        'name':         '@org/release-package'
+                    })
+                ]
+            });
+
+            mockNpmRequest(releasePackage.name, releasePackage);
+
+            await mockArgv([ '--module', releasePackage.name, '--cdn', 'https://www.fakecdn.com', '--commitonly', '--namespace', 'fake-namespace', '--recursive', '--versionsToKeep', '3' ], async () => {
+                await run();
+            });
+
+            expect((await fs.readdir(join(process.cwd(), 'cdn'))).length).toEqual(1);
+
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs'))).length).toEqual(5);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '6.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '5.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
+        });
+
+        test('should ignore prelease versions that are not listed in dist tags', async () => {
+            const releasePackage = createInfoPackage({
+                'name':      '@org/release-package',
+                'latest':   '4.0.0',
+                'distTags':  {
+                    'active-production': '3.0.0-alpha.0'
+                },
+                'versions': [
+                    createVersion({
+                        'version':      '1.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version':      '1.0.0-alpha.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version':      '2.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version':      '2.0.0-alpha.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version':      '3.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version':      '3.0.0-alpha.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version':      '4.0.0',
+                        'name':         '@org/release-package'
+                    }),
+                    createVersion({
+                        'version':      '4.0.0-alpha.0',
+                        'name':         '@org/release-package'
+                    })
+                ]
+            });
+
+            mockNpmRequest(releasePackage.name, releasePackage);
+
+            await mockArgv([ '--module', releasePackage.name, '--cdn', 'https://www.fakecdn.com', '--commitonly', '--namespace', 'fake-namespace', '--recursive', '--versionsToKeep', '2' ], async () => {
+                await run();
+            });
+
+            expect((await fs.readdir(join(process.cwd(), 'cdn'))).length).toEqual(1);
+
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs'))).length).toEqual(4);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '4.0.0-alpha.0.tgz'))).toEqual(false);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '3.0.0-alpha.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '2.0.0-alpha.0.tgz'))).toEqual(false);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '1.0.0.-alpha.0tgz'))).toEqual(false);
+        });
+
+        test('should keep number of specified versions for sub-dependencies', async () => {
+            const subDependencyOne = createInfoPackage({
+                'name':      'sub-dependency-one',
+                'latest':   '16.0.0',
+                'versions': [
+                    createVersion({
+                        'version': '13.0.0',
+                        'name':      'sub-dependency'
+                    }),
+                    createVersion({
+                        'version': '14.0.0',
+                        'name':      'sub-dependency'
+                    }),
+                    createVersion({
+                        'version': '15.0.0',
+                        'name':      'sub-dependency'
+                    }),
+                    createVersion({
+                        'version': '16.0.0',
+                        'name':      'sub-dependency'
+                    })
+                ]
+            });
+
+            const subDependencyTwo = createInfoPackage({
+                'name':      'sub-dependency-two',
+                'latest':   '4.0.0',
+                'versions': [
+                    createVersion({
+                        'version': '1.0.0',
+                        'name':      'sub-dependency-two'
+                    }),
+                    createVersion({
+                        'version': '2.0.0',
+                        'name':      'sub-dependency-two'
+                    }),
+                    createVersion({
+                        'version': '3.0.0',
+                        'name':      'sub-dependency-two'
+                    }),
+                    createVersion({
+                        'version': '4.0.0',
+                        'name':      'sub-dependency-two'
+                    })
+                ]
+            });
+
+            const releasePackage = createInfoPackage({
+                'name':      '@org/release-package',
+                'latest':   '4.0.0',
+                'distTags':  {
+                    'active-production': '3.0.0'
+                },
+                'versions': [
+                    createVersion({
+                        'version':      '1.0.0',
+                        'name':         '@org/release-package',
+                        'dependencies': {
+                            'sub-dependency-one': '13.0.0',
+                            'sub-dependency-two': '2.0.0'
+                        }
+                    }),
+                    createVersion({
+                        'version':      '2.0.0',
+                        'name':         '@org/release-package',
+                        'dependencies': {
+                            'sub-dependency-one': '14.0.0',
+                            'sub-dependency-two': '2.0.0'
+                        }
+                    }),
+                    createVersion({
+                        'version':      '3.0.0',
+                        'name':         '@org/release-package',
+                        'dependencies': {
+                            'sub-dependency-one': '15.0.0',
+                            'sub-dependency-two': '3.0.0'
+                        }
+                    }),
+                    createVersion({
+                        'version':      '4.0.0',
+                        'name':         '@org/release-package',
+                        'dependencies': {
+                            'sub-dependency-one': '16.0.0',
+                            'sub-dependency-two': '3.0.0'
+                        }
+                    })
+                ]
+            });
+
+            mockNpmRequest(releasePackage.name, releasePackage);
+            mockNpmRequest(subDependencyOne.name, subDependencyOne);
+            mockNpmRequest(subDependencyTwo.name, subDependencyTwo);
+
+            await mockArgv([ '--module', releasePackage.name, '--cdn', 'https://www.fakecdn.com', '--commitonly', '--namespace', 'fake-namespace', '--recursive', '--versionsToKeep', '1' ], async () => {
+                await run();
+            });
+
+            expect((await fs.readdir(join(process.cwd(), 'cdn'))).length).toEqual(3);
+
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs'))).length).toEqual(3);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
+
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-one', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(process.cwd(), 'cdn', 'sub-dependency-one', 'tarballs'))).length).toEqual(3);
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-one', 'tarballs', '16.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-one', 'tarballs', '15.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-one', 'tarballs', '14.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-one', 'tarballs', '13.0.0.tgz'))).toEqual(false);
+
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-two', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(process.cwd(), 'cdn', 'sub-dependency-two', 'tarballs'))).length).toEqual(2);
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-two', 'tarballs', '4.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-two', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-two', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(process.cwd(), 'cdn', 'sub-dependency-two', 'tarballs', '1.0.0.tgz'))).toEqual(false);
         });
     });
 });

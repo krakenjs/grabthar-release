@@ -11,6 +11,7 @@ import fetchRetry from '@vercel/fetch-retry';
 import { ensureDir, outputFile, exists, remove, existsSync, readFileSync } from 'fs-extra';
 import commandLineArgs from 'command-line-args';
 import { prompt } from 'inquirer';
+import { rcompare, valid, prerelease } from 'semver';
 
 import { info, booleanEnv, npmDownload, getDistVersions, unique, exec } from './grabthar-utils';
 
@@ -46,7 +47,8 @@ const getOptions = () => {
         { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
         { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
         { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) },
-        { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) }
+        { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) },
+        { name: 'versionsToKeep',    type: Number, defaultValue: process.env.VERSIONS_TO_KEEP || 0  }
     ], {
         partial: true
     });
@@ -91,6 +93,31 @@ type CdnifyGenerateModuleOptions = {|
     parentName? : string
 |};
 
+const getVersionsToKeep = async ({ options, name, parentName } : {|options : Object, name : string, parentName? : string|}) => {
+    // we want to gather all of the versions for the top-level package. If parentName exists, that is the top level
+    // if it is undefined, then we are dealing with the top-level package
+    const topLevelName = parentName || name;
+    const { versions } = await info(topLevelName, options.disttag);
+
+    const activeVersionsToKeep = await getDistVersions(topLevelName);
+    const inactiveVersionsToKeep = Object.keys(versions)
+        .filter(version => valid(version) && prerelease(version) === null)
+        .filter(version => !activeVersionsToKeep.includes(version))
+        .sort(rcompare)
+        .slice(0, options.versionsToKeep);
+    const versionsToKeep = [ ...activeVersionsToKeep, ...inactiveVersionsToKeep ];
+    
+    // if parentName is true, this is a sub dependency of a top-level package. In that case, we want to get all the versions
+    // listed for this sub dependency for each version of the top-level package that we are keeping. If parentName if false,
+    // this is a top-level package and we already computed the versions we are keeping.
+    if (parentName) {
+        return unique(versionsToKeep.map(parentActiveVersion => versions[parentActiveVersion].dependencies[name]));
+    } else {
+        return versionsToKeep;
+    }
+
+};
+
 const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName } : CdnifyGenerateModuleOptions, options) => {
     const pkgInfo = await info(name, options.disttag);
 
@@ -123,18 +150,10 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName } 
 
     await npmDownload(tarball, cdnModuleTarballDir, cdnModuleTarballFileName);
 
-    let activeVersions;
-
-    if (parentName) {
-        const parentPackage = await info(parentName, options.disttag);
-        const parentActiveVersions = await getDistVersions(parentName);
-        activeVersions = unique(parentActiveVersions.map(parentActiveVersion => parentPackage.versions[parentActiveVersion].dependencies[name]));
-    } else {
-        activeVersions = await getDistVersions(name);
-    }
+    const versionsToKeep = await getVersionsToKeep({ options, name, parentName });
 
     for (const existingVersion of Object.keys(pkgInfo.versions)) {
-        if (activeVersions.indexOf(existingVersion) === -1) {
+        if (!versionsToKeep.includes(existingVersion)) {
             const versionConfig = pkgInfo.versions[existingVersion];
             const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
 
@@ -168,7 +187,7 @@ const cdnifyGenerate = async (options) => {
     const name = options.module;
     const cdnNamespace = options.namespace;
 
-    for (const version of await getDistVersions(name)) {
+    for (const version of await getVersionsToKeep({ options, name })) {
         await cdnifyGenerateModule({
             cdnNamespace,
             name,
