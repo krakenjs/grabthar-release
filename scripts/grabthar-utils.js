@@ -168,7 +168,11 @@ export type PackageInfo = {|
     }
 |};
 
-const infoCache = {};
+let infoCache = {};
+
+export const clearInfoCache = () => {
+    infoCache = {};
+};
 
 export const info = async (name : string, expectedDistTag? : string) : Promise<PackageInfo> => {
     const options = getOptions();

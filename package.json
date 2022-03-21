@@ -7,7 +7,8 @@
     "flow-typed": "rm -rf ./flow-typed && flow-typed install",
     "lint": "eslint scripts/ --ext .js,.mjs",
     "flow": "flow check",
-    "test": "npm run lint && npm run flow-typed && npm run flow",
+    "jest": "jest",
+    "test": "npm run lint && npm run flow-typed && npm run flow && npm run jest",
     "babel": "babel scripts --ignore=node_modules,scripts/*.mjs --out-dir scripts --source-maps inline",
     "prepublishOnly": "npm run babel",
     "postpublish": "git checkout ./scripts",
@@ -77,5 +78,12 @@
     "parse-diff": "^0.8.1",
     "shelljs": "^0.8.4",
     "zx": "4.3.0"
+  },
+  "devDependencies": {
+    "fetch-mock-jest": "^1.5.1",
+    "jest": "^27.5.1",
+    "memfs": "^3.4.1",
+    "mock-argv": "^2.0.8",
+    "mock-fs": "^5.1.2"
   }
 }

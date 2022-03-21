@@ -29,56 +29,59 @@ type NodeOps = {|
     |}
 |};
 
-const options = commandLineArgs([
-    { name: 'module', type: String, defaultOption: true },
+const getOptions = () => {
+    const options = commandLineArgs([
+        { name: 'module', type: String, defaultOption: true },
+        { name: 'cdn',           type: String,  defaultValue: process.env.CDN            || '' },
+        { name: 'namespace',     type: String,  defaultValue: process.env.NAMESPACE      || '' },
+        { name: 'infofile',      type: String,  defaultValue: process.env.INFO_FILE      || 'info.json' },
+        { name: 'tarballfolder', type: String,  defaultValue: process.env.TARBALL_FOLDER || 'tarballs' },
+        { name: 'cdnpath',       type: String,  defaultValue: process.env.CDN_PATH       || join(process.cwd(), 'cdn') },
+        { name: 'recursive',     type: Boolean, defaultValue: booleanEnv(process.env.RECURSIVE) },
+        { name: 'package',       type: String,  defaultValue: process.env.PACKAGE        || join(process.cwd(), 'package.json') },
+        { name: 'nodeops',       type: String,  defaultValue: process.env.NODE_OPS       || join(process.cwd(), '.nodeops') },
+        { name: 'cdnapi',        type: String,  defaultValue: process.env.CDNAPI         || 'https://cdnx-api.qa.paypal.com' },
+        { name: 'requester',     type: String,  defaultValue: process.env.REQUESTER      || 'svc-xo' },
+        { name: 'password',      type: String,  defaultValue: process.env.SVC_PASSWORD },
+        { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
+        { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
+        { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) },
+        { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) }
+    ], {
+        partial: true
+    });
 
-    { name: 'cdn',           type: String,  defaultValue: process.env.CDN            || '' },
-    { name: 'namespace',     type: String,  defaultValue: process.env.NAMESPACE      || '' },
-    { name: 'infofile',      type: String,  defaultValue: process.env.INFO_FILE      || 'info.json' },
-    { name: 'tarballfolder', type: String,  defaultValue: process.env.TARBALL_FOLDER || 'tarballs' },
-    { name: 'cdnpath',       type: String,  defaultValue: process.env.CDN_PATH       || join(process.cwd(), 'cdn') },
-    { name: 'recursive',     type: Boolean, defaultValue: booleanEnv(process.env.RECURSIVE) },
-    { name: 'package',       type: String,  defaultValue: process.env.PACKAGE        || join(process.cwd(), 'package.json') },
-    { name: 'nodeops',       type: String,  defaultValue: process.env.NODE_OPS       || join(process.cwd(), '.nodeops') },
-    { name: 'cdnapi',        type: String,  defaultValue: process.env.CDNAPI         || 'https://cdnx-api.qa.paypal.com' },
-    { name: 'requester',     type: String,  defaultValue: process.env.REQUESTER      || 'svc-xo' },
-    { name: 'password',      type: String,  defaultValue: process.env.SVC_PASSWORD },
-    { name: 'approver',      type: String,  defaultValue: process.env.APPROVER       || userInfo().username },
-    { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
-    { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) },
-    { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) }
-], {
-    partial: true
-});
+    const getPackage = () : Package => {
+        if (!options.package || !existsSync(options.package)) {
+            throw new Error(`Package file not found`);
+        }
+        return JSON.parse(readFileSync(options.package));
+    };
 
-const getPackage = () : Package => {
-    if (!options.package || !existsSync(options.package)) {
-        throw new Error(`Package file not found`);
+    const getNodeOps = () : NodeOps => {
+        if (!options.nodeops || !existsSync(options.nodeops)) {
+            throw new Error(`Node Ops file not found`);
+        }
+        return JSON.parse(readFileSync(options.nodeops));
+    };
+
+    options.module = options.module || getPackage().name;
+    options.namespace = options.namespace || getNodeOps().web.staticNamespace;
+
+    if (!options.module) {
+        throw new Error(`Module name required`);
     }
-    return JSON.parse(readFileSync(options.package));
-};
 
-const getNodeOps = () : NodeOps => {
-    if (!options.nodeops || !existsSync(options.nodeops)) {
-        throw new Error(`Node Ops file not found`);
+    if (!options.namespace) {
+        throw new Error(`Namespace required`);
     }
-    return JSON.parse(readFileSync(options.nodeops));
+
+    if (!options.cdn) {
+        throw new Error(`CDN required`);
+    }
+
+    return options;
 };
-
-options.module = options.module || getPackage().name;
-options.namespace = options.namespace || getNodeOps().web.staticNamespace;
-
-if (!options.module) {
-    throw new Error(`Module name required`);
-}
-
-if (!options.namespace) {
-    throw new Error(`Namespace required`);
-}
-
-if (!options.cdn) {
-    throw new Error(`CDN required`);
-}
 
 type CdnifyGenerateModuleOptions = {|
     cdnNamespace : string,
@@ -88,7 +91,7 @@ type CdnifyGenerateModuleOptions = {|
     parentName? : string
 |};
 
-const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, prune = true } : CdnifyGenerateModuleOptions) => {
+const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName } : CdnifyGenerateModuleOptions, options) => {
     const pkgInfo = await info(name, options.disttag);
 
     if (!version) {
@@ -120,29 +123,27 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, p
 
     await npmDownload(tarball, cdnModuleTarballDir, cdnModuleTarballFileName);
 
-    if (prune) {
-        let activeVersions;
+    let activeVersions;
 
-        if (parentName) {
-            const parentPackage = await info(parentName, options.disttag);
-            const parentActiveVersions = await getDistVersions(parentName);
-            activeVersions = unique(parentActiveVersions.map(parentActiveVersion => parentPackage.versions[parentActiveVersion].dependencies[name]));
-        } else {
-            activeVersions = await getDistVersions(name);
-        }
+    if (parentName) {
+        const parentPackage = await info(parentName, options.disttag);
+        const parentActiveVersions = await getDistVersions(parentName);
+        activeVersions = unique(parentActiveVersions.map(parentActiveVersion => parentPackage.versions[parentActiveVersion].dependencies[name]));
+    } else {
+        activeVersions = await getDistVersions(name);
+    }
 
-        for (const existingVersion of Object.keys(pkgInfo.versions)) {
-            if (activeVersions.indexOf(existingVersion) === -1) {
-                const versionConfig = pkgInfo.versions[existingVersion];
-                const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
+    for (const existingVersion of Object.keys(pkgInfo.versions)) {
+        if (activeVersions.indexOf(existingVersion) === -1) {
+            const versionConfig = pkgInfo.versions[existingVersion];
+            const existingVersionTarballPath = join(cdnModuleTarballDir, `${ existingVersion }${ extname(versionConfig.dist.tarball) }`);
 
-                if (await exists(existingVersionTarballPath)) {
-                    console.info('Cleaning up', existingVersionTarballPath);
-                    await remove(existingVersionTarballPath);
-                }
-
-                delete pkgInfo.versions[existingVersion];
+            if (await exists(existingVersionTarballPath)) {
+                console.info('Cleaning up', existingVersionTarballPath);
+                await remove(existingVersionTarballPath);
             }
+
+            delete pkgInfo.versions[existingVersion];
         }
     }
 
@@ -163,16 +164,16 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, p
     await outputFile(cdnModuleInfoFile, JSON.stringify(pkgInfo, null, 4));
 };
 
-const cdnifyGenerate = async (name : string) => {
+const cdnifyGenerate = async (options) => {
+    const name = options.module;
     const cdnNamespace = options.namespace;
 
     for (const version of await getDistVersions(name)) {
         await cdnifyGenerateModule({
             cdnNamespace,
             name,
-            version,
-            prune: true
-        });
+            version
+        }, options);
 
         if (options.recursive) {
             const packageInfo = await info(name, options.disttag);
@@ -186,9 +187,8 @@ const cdnifyGenerate = async (name : string) => {
                     cdnNamespace,
                     name:          dependencyName,
                     version:       dependencyVersion,
-                    prune:         true,
                     parentName:    name
-                });
+                }, options);
             }));
         }
     }
@@ -227,7 +227,7 @@ const getYesNo = async (message) => {
     return value;
 };
 
-const web = async (cmd) => {
+const web = async (cmd, options) => {
     return await exec(`npx @paypalcorp/web ${ cmd }`, {
         JENKINS_HOME:     '1',
         SVC_ACC_USERNAME: options.requester,
@@ -239,7 +239,7 @@ const sleep = (time : number) => {
     return new Promise(resolve => setTimeout(resolve, time));
 };
 
-const cdnifyCommit = async () => {
+const cdnifyCommit = async (options) => {
     const status = await exec('git status');
 
     if (status.indexOf('nothing to commit, working tree clean') !== -1) {
@@ -251,11 +251,11 @@ const cdnifyCommit = async () => {
     await exec('git push');
 };
 
-const cdnifyDeploy = async () => {
-    const { id } = await web(`stage --json`);
+const cdnifyDeploy = async (options) => {
+    const { id } = await web(`stage --json`, options);
 
     try {
-        await await web(`notify ${ id }`);
+        await await web(`notify ${ id }`, options);
     } catch (err) {
         // pass
     }
@@ -272,13 +272,13 @@ const cdnifyDeploy = async () => {
         }
     }
 
-    await await web(`deploy ${ id }`);
+    await await web(`deploy ${ id }`, options);
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
         await sleep(10 * 1000);
         try {
-            await await web(`status ${ id } --all`);
+            await await web(`status ${ id } --all`, options);
         } catch (err) {
             continue;
         }
@@ -287,27 +287,31 @@ const cdnifyDeploy = async () => {
     }
 };
 
-const run = async () => {
+export const run = async () => {
+    const options = getOptions();
+
     if (options.deployonly) {
-        return await cdnifyDeploy();
+        return await cdnifyDeploy(options);
     }
 
-    await cdnifyGenerate(options.module);
+    await cdnifyGenerate(options);
 
     if (options.commitonly) {
-        return await cdnifyCommit();
+        return await cdnifyCommit(options);
     }
 
     if (!await getYesNo('Commit and deploy?')) {
         return;
     }
 
-    await cdnifyCommit();
-    await cdnifyDeploy();
+    await cdnifyCommit(options);
+    await cdnifyDeploy(options);
 };
 
-run().catch((err) => {
-    console.error(err);
-    // eslint-disable-next-line no-process-exit
-    process.exit(1);
-});
+if (process.env.NODE_ENV !== 'test') {
+    run().catch((err) => {
+        console.error(err);
+        // eslint-disable-next-line no-process-exit
+        process.exit(1);
+    });
+}
