@@ -16,9 +16,6 @@ let BUMP = 'patch';
 let DIST_TAG = 'latest';
 let twoFactorCode;
 
-const CWD = cwd();
-const { version: LOCAL_VERSION } = require(`${ CWD }/package.json`);
-
 let { stdout: REMOTE_URL } = await $`git config --get remote.origin.url`;
 REMOTE_URL = REMOTE_URL.trim();
 
@@ -72,6 +69,10 @@ if (NPM_TOKEN) {
 
 await $`git checkout package.json`;
 await $`git checkout package-lock.json || echo 'Package lock not found'`;
+
+const CWD = cwd();
+const { version: LOCAL_VERSION } = require(`${ CWD }/package.json`);
+
 await $`grabthar-verify-npm-publish --LOCAL_VERSION=${ LOCAL_VERSION } --DIST_TAG=${ DIST_TAG }`;
 
 // update non-prod dist tags whenever the latest dist tag changes
