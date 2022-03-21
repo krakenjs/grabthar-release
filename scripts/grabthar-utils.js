@@ -27,16 +27,18 @@ export const booleanEnv = (val : ?string, def : boolean = false) : boolean => {
     return def;
 };
 
-const conf = config.read();
+const getOptions = () => {
+    const conf = config.read();
 
-const options = commandLineArgs([
-    { name: 'verbose', type: Boolean, defaultValue: booleanEnv(process.env.VERBOSE) },
-    { name: 'registry',      type: String,  defaultValue: process.env.REGISTRY       || 'https://registry.npmjs.org' },
-    { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
-    { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) }
-], {
-    partial: true
-});
+    return commandLineArgs([
+        { name: 'verbose', type: Boolean, defaultValue: booleanEnv(process.env.VERBOSE) },
+        { name: 'registry',      type: String,  defaultValue: process.env.REGISTRY       || 'https://registry.npmjs.org' },
+        { name: 'npmproxy',      type: String,  defaultValue: process.env.NPM_PROXY      || conf.get('https_proxy') || conf.get('proxy') || '' },
+        { name: 'ipv6',          type: Boolean, defaultValue: booleanEnv(process.env.IPV6) }
+    ], {
+        partial: true
+    });
+};
 
 export const unique = <T>(arr : $ReadOnlyArray<T>) : $ReadOnlyArray<T> => {
     return [ ...new Set(arr) ];
@@ -56,6 +58,7 @@ export const dns = async (host : string, family? : number = 6) : Promise<string>
 
 export async function exec<T>(cmd : string, envVars? : {| [string] : string |}) : Promise<T> {
     const env = envVars || {};
+    const options = getOptions();
 
     const cmdString = `> ${ Object.keys(env).map(key => `${ key }=${ env[key] }`).join(' ') } ${ cmd }\n`;
 
@@ -98,6 +101,7 @@ export async function exec<T>(cmd : string, envVars? : {| [string] : string |}) 
 
 export const npmFetch = async (url : string) => {
     const opts = {};
+    const options = getOptions();
 
     const host = getHost(url);
 
@@ -122,6 +126,7 @@ export const npmFetch = async (url : string) => {
 
 export const npmDownload = async (url : string, dir : string, filename : string) : Promise<void> => {
     const opts = {};
+    const options = getOptions();
 
     const host = getHost(url);
 
@@ -166,6 +171,7 @@ export type PackageInfo = {|
 const infoCache = {};
 
 export const info = async (name : string, expectedDistTag? : string) : Promise<PackageInfo> => {
+    const options = getOptions();
     let infoResPromise;
 
     if (infoCache[name]) {
