@@ -4,20 +4,57 @@
 import { cwd, env } from 'process';
 import { createRequire } from 'module';
 
-import { $, argv, question } from 'zx';
+import { $, question, fetch } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
+
 let { NPM_TOKEN } = env;
-let { DIST_TAG, BUMP } = argv;
+NPM_TOKEN = NPM_TOKEN || '';
+
+let BUMP = 'patch';
+let DIST_TAG = 'latest';
 let twoFactorCode;
 
-DIST_TAG = DIST_TAG || 'latest';
-BUMP = BUMP || 'patch';
-NPM_TOKEN = NPM_TOKEN || '';
+let { stdout: REMOTE_URL } = await $`git config --get remote.origin.url`;
+REMOTE_URL = REMOTE_URL.trim();
+
+if (REMOTE_URL.includes('.git')) {
+    REMOTE_URL = REMOTE_URL.replace('.git', '');
+}
+
+const isForked = async () => {
+    const { pathname } = new URL(`${ REMOTE_URL }`);
+    const data = await fetch(`https://api.github.com/repos${ pathname }`);
+    const jsonData = await data.json();
+    if (jsonData.message === 'Not Found') {
+        throw new Error('Repo not found via the GitHub Repos API.');
+    }
+    const { fork } = jsonData;
+    return fork;
+};
+
+const forked = await isForked();
+
+if (forked) {
+    throw new Error('Publishing from a fork is not allowed.');
+}
 
 await $`grabthar-validate-git`;
 await $`grabthar-validate-npm`;
+
+// This will determine the type of release based on the git branch. When the default branch is used, it will be a `patch` that's published to npm under the `latest` dist-tag. Any other branch will be a `prelease` that's published to npm under the `alpha` dist-tag.
+
+let { stdout: CURRENT_BRANCH } = await $`git rev-parse --abbrev-ref HEAD`;
+CURRENT_BRANCH = CURRENT_BRANCH.trim();
+let { stdout: DEFAULT_BRANCH } = await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
+DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
+
+if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
+    BUMP = 'prerelease';
+    DIST_TAG = 'alpha';
+}
+
 await $`npm version ${ BUMP }`;
 await $`git push`;
 await $`git push --tags`;
