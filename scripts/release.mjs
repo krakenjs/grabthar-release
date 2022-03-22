@@ -59,7 +59,11 @@ if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
 }
 
 await $`git push`;
-await $`git push --tags`;
+
+if (DIST_TAG === 'latest') {
+    await $`git push --tags`;
+}
+
 await $`grabthar-flatten`;
 
 if (NPM_TOKEN) {
