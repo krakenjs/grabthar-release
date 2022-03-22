@@ -53,11 +53,17 @@ DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
     BUMP = 'prerelease';
     DIST_TAG = 'alpha';
+    await $`npm --no-git-tag-version version ${ BUMP } --preid=${ DIST_TAG }`;
+} else {
+    await $`npm version ${ BUMP }`;
 }
 
-await $`npm version ${ BUMP }`;
 await $`git push`;
-await $`git push --tags`;
+
+if (DIST_TAG === 'latest') {
+    await $`git push --tags`;
+}
+
 await $`grabthar-flatten`;
 
 if (NPM_TOKEN) {
