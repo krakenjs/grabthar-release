@@ -99,7 +99,7 @@ export async function exec<T>(cmd : string, envVars? : {| [string] : string |}) 
     }
 }
 
-export const npmFetch = async (url : string) => {
+export const npmFetch = async (url : string) : Promise<Object> => {
     const opts = {};
     const options = getOptions();
 

@@ -11,6 +11,7 @@ import fetchRetry from '@vercel/fetch-retry';
 import { ensureDir, outputFile, exists, remove, existsSync, readFileSync } from 'fs-extra';
 import commandLineArgs from 'command-line-args';
 import { prompt } from 'inquirer';
+// $FlowFixMe[missing-export] for prerelease
 import { rcompare, valid, prerelease } from 'semver';
 
 import { info, booleanEnv, npmDownload, getDistVersions, unique, exec } from './grabthar-utils';
@@ -306,7 +307,7 @@ const cdnifyDeploy = async (options) => {
     }
 };
 
-export const run = async () => {
+export const run = async () : Promise<void> => {
     const options = getOptions();
 
     if (options.deployonly) {
