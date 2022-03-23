@@ -62,9 +62,12 @@ await $`git push`;
 
 if (DIST_TAG === 'latest') {
     await $`git push --tags`;
+    await $`grabthar-flatten`;
+} else {
+    await $`git stash`;
+    await $`grabthar-flatten`;
+    await $`git stash apply`;
 }
-
-await $`grabthar-flatten`;
 
 if (NPM_TOKEN) {
     await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --tag ${ DIST_TAG }`;
