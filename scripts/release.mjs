@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off */
+/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, import/no-commonjs: off */
 
 import { cwd, env } from 'process';
 import { createRequire } from 'module';
@@ -50,10 +50,14 @@ CURRENT_BRANCH = CURRENT_BRANCH.trim();
 let { stdout: DEFAULT_BRANCH } = await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
+const crypto = require('crypto');
+
+const UID = crypto.randomBytes(4).toString('hex');
+
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
     BUMP = 'prerelease';
     DIST_TAG = 'alpha';
-    await $`npm version ${ BUMP } --preid=${ DIST_TAG }`;
+    await $`npm version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
 } else {
     await $`npm version ${ BUMP }`;
 }
