@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, import/no-commonjs: off */
+/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off */
 
 import { cwd, env } from 'process';
 import { createRequire } from 'module';
+import crypto from 'crypto';
 
 import { $, question, fetch } from 'zx';
 
@@ -49,8 +50,6 @@ let { stdout: CURRENT_BRANCH } = await $`git rev-parse --abbrev-ref HEAD`;
 CURRENT_BRANCH = CURRENT_BRANCH.trim();
 let { stdout: DEFAULT_BRANCH } = await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
-
-const crypto = require('crypto');
 
 const UID = crypto.randomBytes(4).toString('hex');
 
