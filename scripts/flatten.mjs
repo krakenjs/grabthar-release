@@ -9,7 +9,6 @@ import { $ } from 'zx';
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
 
-await $`grabthar-validate-git`;
 await $`grabthar-validate-flat`;
 
 const fs = require('fs');
