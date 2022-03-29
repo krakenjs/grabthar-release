@@ -3,6 +3,7 @@
 
 import { cwd, env } from 'process';
 import { createRequire } from 'module';
+import crypto from 'crypto';
 
 import { $, question, fetch } from 'zx';
 
@@ -50,10 +51,12 @@ CURRENT_BRANCH = CURRENT_BRANCH.trim();
 let { stdout: DEFAULT_BRANCH } = await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
+const UID = crypto.randomBytes(4).toString('hex');
+
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
     BUMP = 'prerelease';
     DIST_TAG = 'alpha';
-    await $`npm version ${ BUMP } --preid=${ DIST_TAG }`;
+    await $`npm version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
 } else {
     await $`npm version ${ BUMP }`;
 }
