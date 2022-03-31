@@ -12,7 +12,7 @@
     "babel": "babel scripts --ignore=node_modules,scripts/*.mjs --out-dir scripts --source-maps inline",
     "postinstall": "npm_config_registry=https://npm.paypal.com npm install @paypalcorp/web --no-save --proxy='null' --https-proxy='null' || echo 'Unable to install cdnx cli tools'",
     "prepare": "husky install",
-    "prerelease": "npm run babel",
+    "prepublishOnly": "npm run babel",
     "release": "standard-version",
     "postrelease": "git push && git push --follow-tags && npm publish && git checkout ./scripts"
   },
