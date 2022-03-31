@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.4](https://github.com/krakenjs/grabthar-release/compare/v2.1.3...v2.1.4) (2022-03-31)
+
+
+### Bug Fixes
+
+* run git checkout ./scripts after pushing and publishing ([0d60a06](https://github.com/krakenjs/grabthar-release/commit/0d60a06c0ba231fdbeb52b0b8186bbd18bf3c81f))
+* use prepublishOnly for babel ([78b92df](https://github.com/krakenjs/grabthar-release/commit/78b92dfdd01a65b3f748ccfc17667db3fcd664fc))
+
 ### [2.1.2](https://github.com/krakenjs/grabthar-release/compare/v2.1.1...v2.1.2) (2022-03-30)
 
 ### [2.1.1](https://github.com/krakenjs/grabthar-release/compare/v2.1.0...v2.1.1) (2022-03-30)
