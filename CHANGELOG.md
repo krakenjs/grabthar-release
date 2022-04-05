@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.5](https://github.com/krakenjs/grabthar-release/compare/v2.1.4...v2.1.5) (2022-04-05)
+
+
+* use semver for valid dep check in flatten step ([d26fa83](https://github.com/krakenjs/grabthar-release/commit/d26fa83a9af259a4abfc430fdd009594c0950a1b))
+
 ### [2.1.4](https://github.com/krakenjs/grabthar-release/compare/v2.1.3...v2.1.4) (2022-03-31)
 
 
