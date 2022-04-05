@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off */
+/* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-console: off */
 
 import { cwd, env } from 'process';
 import { createRequire } from 'module';
@@ -10,8 +10,9 @@ import { $, question, fetch } from 'zx';
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
 
-let { NPM_TOKEN } = env;
+let { NPM_TOKEN, DRY_RUN } = env;
 NPM_TOKEN = NPM_TOKEN || '';
+DRY_RUN = DRY_RUN || false;
 
 let BUMP = 'patch';
 let DIST_TAG = 'latest';
@@ -56,31 +57,51 @@ const UID = crypto.randomBytes(4).toString('hex');
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
     BUMP = 'prerelease';
     DIST_TAG = 'alpha';
-    await $`npm version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
+    if (!DRY_RUN) {
+        await $`npm version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
+    } else {
+        console.log(`npm version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`);
+    }
 } else {
-    await $`npm version ${ BUMP }`;
+    if (!DRY_RUN) {
+        await $`npm version ${ BUMP }`;
+    } else {
+        console.log(`npm version ${ BUMP }`);
+    }
 }
 
-await $`git push`;
-await $`git push --tags`;
-await $`grabthar-flatten`;
+if (!DRY_RUN) {
+    await $`git push`;
+    await $`git push --tags`;
+    await $`grabthar-flatten`;
+}
 
 if (NPM_TOKEN) {
-    await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --tag ${ DIST_TAG }`;
+    if (!DRY_RUN) {
+        await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --tag ${ DIST_TAG }`;
+    } else {
+        await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --dry-run --tag ${ DIST_TAG }`;
+    }
 } else {
     twoFactorCode = await question('NPM 2FA Code: ');
-    await $`npm publish --tag ${ DIST_TAG } --otp ${ twoFactorCode }`;
+    if (!DRY_RUN) {
+        await $`npm publish --tag ${ DIST_TAG } --otp ${ twoFactorCode }`;
+    } else {
+        await $`npm publish --dry-run --tag ${ DIST_TAG } --otp ${ twoFactorCode }`;
+    }
 }
 
-await $`git checkout package.json`;
-await $`git checkout package-lock.json || echo 'Package lock not found'`;
-
-const CWD = cwd();
-const { version: LOCAL_VERSION } = require(`${ CWD }/package.json`);
-
-await $`grabthar-verify-npm-publish --LOCAL_VERSION=${ LOCAL_VERSION } --DIST_TAG=${ DIST_TAG }`;
-
-// update non-prod dist tags whenever the latest dist tag changes
-if (DIST_TAG === 'latest') {
-    await $`grabthar-activate --LOCAL_VERSION=${ LOCAL_VERSION } --CDNIFY=false --ENVS=test,local,stage`;
+if (!DRY_RUN) {
+    await $`git checkout package.json`;
+    await $`git checkout package-lock.json || echo 'Package lock not found'`;
+    
+    const CWD = cwd();
+    const { version: LOCAL_VERSION } = require(`${ CWD }/package.json`);
+    
+    await $`grabthar-verify-npm-publish --LOCAL_VERSION=${ LOCAL_VERSION } --DIST_TAG=${ DIST_TAG }`;
+    
+    // update non-prod dist tags whenever the latest dist tag changes
+    if (DIST_TAG === 'latest') {
+        await $`grabthar-activate --LOCAL_VERSION=${ LOCAL_VERSION } --CDNIFY=false --ENVS=test,local,stage`;
+    }
 }
