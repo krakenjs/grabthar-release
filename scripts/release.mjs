@@ -5,14 +5,16 @@ import { cwd, env } from 'process';
 import { createRequire } from 'module';
 import crypto from 'crypto';
 
-import { $, question, fetch } from 'zx';
+import { $, question, fetch, argv } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
 
-let { NPM_TOKEN, DRY_RUN } = env;
+let { NPM_TOKEN } = env;
 NPM_TOKEN = NPM_TOKEN || '';
-DRY_RUN = DRY_RUN || false;
+
+let { DRY_RUN } = argv;
+DRY_RUN = DRY_RUN === 'true' ? true : false;
 
 let BUMP = 'patch';
 let DIST_TAG = 'latest';
