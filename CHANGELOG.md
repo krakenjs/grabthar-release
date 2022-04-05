@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.6](https://github.com/krakenjs/grabthar-release/compare/v2.1.5...v2.1.6) (2022-04-05)
+
+
+* remove flatten version check ([95827c8](https://github.com/krakenjs/grabthar-release/commit/95827c89269a6988a613144cc92adf2536b220c3))
+
 ### [2.1.5](https://github.com/krakenjs/grabthar-release/compare/v2.1.4...v2.1.5) (2022-04-05)
 
 
