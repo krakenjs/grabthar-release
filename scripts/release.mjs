@@ -57,7 +57,7 @@ const UID = crypto.randomBytes(4).toString('hex');
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
     BUMP = 'prerelease';
     DIST_TAG = 'alpha';
-    if (!DRY_RUN){
+    if (!DRY_RUN) {
         await $`npm version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
     } else {
         await $`npm --no-git-tag-version version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
