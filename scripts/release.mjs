@@ -100,4 +100,16 @@ if (!DRY_RUN) {
     if (DIST_TAG === 'latest') {
         await $`grabthar-activate --LOCAL_VERSION=${ LOCAL_VERSION } --CDNIFY=false --ENVS=test,local,stage`;
     }
+} else {
+    const CWD = cwd();
+    const { version: LOCAL_VERSION } = require(`${ CWD }/package.json`);
+
+    console.log(`grabthar-verify-npm-publish --LOCAL_VERSION=${ LOCAL_VERSION } --DIST_TAG=${ DIST_TAG }`);
+
+    if (DIST_TAG === 'latest') {
+        console.log(`grabthar-activate --LOCAL_VERSION=${ LOCAL_VERSION } --CDNIFY=false --ENVS=test,local,stage`);
+    }
+
+    await $`git checkout package.json`;
+    await $`git checkout package-lock.json || echo 'Package lock not found'`;
 }
