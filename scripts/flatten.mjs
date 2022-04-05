@@ -4,7 +4,6 @@
 import { cwd } from 'process';
 import { createRequire } from 'module';
 
-import { valid } from 'semver';
 import { $ } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
@@ -39,12 +38,6 @@ for (const depName of Object.keys(pkgLock.dependencies)) {
     }
 
     flattenedDependencies[depName] = dep.version;
-}
-
-for (const depName of Object.keys(pkg.dependencies)) {
-    if (!valid(pkg.dependencies[depName])) {
-        throw new Error(`Invalid dependency: ${  depName  }@${  pkg.dependencies[depName] }`);
-    }
 }
 
 pkg.dependencies = flattenedDependencies;
