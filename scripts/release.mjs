@@ -66,6 +66,10 @@ if (!DRY_RUN) {
     await $`git push`;
     await $`git push --tags`;
     await $`grabthar-flatten`;
+} else {
+    console.log(`git push`);
+    console.log(`git push --tags`);
+    console.log(`grabthar-flatten`);
 }
 
 if (NPM_TOKEN) {
