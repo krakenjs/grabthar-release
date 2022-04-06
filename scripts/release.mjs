@@ -70,12 +70,12 @@ if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
 if (DRY_RUN) {
     console.log(`git push`);
     console.log(`git push --tags`);
-    await $`grabthar-flatten`;
 } else {
     await $`git push`;
     await $`git push --tags`;
-    await $`grabthar-flatten`;
 }
+
+await $`grabthar-flatten`;
 
 if (NPM_TOKEN) {
     await $`NPM_TOKEN=${ NPM_TOKEN } npm publish ${ dryRun } --tag ${ DIST_TAG }`;
