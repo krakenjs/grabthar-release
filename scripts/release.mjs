@@ -16,6 +16,9 @@ NPM_TOKEN = NPM_TOKEN || '';
 let { DRY_RUN } = argv;
 DRY_RUN = DRY_RUN === 'true' ? true : false;
 
+const noGitTag = DRY_RUN ? '--no-git-tag-version' : '';
+const dryRun = DRY_RUN ? '--dry-run' : '';
+
 let BUMP = 'patch';
 let DIST_TAG = 'latest';
 let twoFactorCode;
@@ -59,17 +62,9 @@ const UID = crypto.randomBytes(4).toString('hex');
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
     BUMP = 'prerelease';
     DIST_TAG = 'alpha';
-    if (DRY_RUN) {
-        await $`npm --no-git-tag-version version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
-    } else {
-        await $`npm version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
-    }
+    await $`npm ${ noGitTag } version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
 } else {
-    if (DRY_RUN) {
-        await $`npm --no-git-tag-version version ${ BUMP }`;
-    } else {
-        await $`npm version ${ BUMP }`;
-    }
+    await $`npm ${ noGitTag } version ${ BUMP }`;
 }
 
 if (DRY_RUN) {
@@ -83,18 +78,10 @@ if (DRY_RUN) {
 }
 
 if (NPM_TOKEN) {
-    if (DRY_RUN) {
-        await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --dry-run --tag ${ DIST_TAG }`;
-    } else {
-        await $`NPM_TOKEN=${ NPM_TOKEN } npm publish --tag ${ DIST_TAG }`;
-    }
+    await $`NPM_TOKEN=${ NPM_TOKEN } npm publish ${ dryRun } --tag ${ DIST_TAG }`;
 } else {
     twoFactorCode = await question('NPM 2FA Code: ');
-    if (DRY_RUN) {
-        await $`npm publish --dry-run --tag ${ DIST_TAG } --otp ${ twoFactorCode }`;
-    } else {
-        await $`npm publish --tag ${ DIST_TAG } --otp ${ twoFactorCode }`;
-    }
+    await $`npm publish ${ dryRun } --tag ${ DIST_TAG } --otp ${ twoFactorCode }`;
 }
 
 if (DRY_RUN) {
