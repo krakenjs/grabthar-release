@@ -14,7 +14,7 @@ let { NPM_TOKEN } = env;
 NPM_TOKEN = NPM_TOKEN || '';
 
 let { DRY_RUN } = argv;
-DRY_RUN = DRY_RUN === 'true' ? true : false;
+DRY_RUN = DRY_RUN === 'true';
 
 const noGitTag = DRY_RUN ? '--no-git-tag-version' : '';
 const dryRun = DRY_RUN ? '--dry-run' : '';
