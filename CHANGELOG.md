@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.1](https://github.com/krakenjs/grabthar-release/compare/v2.2.0...v2.2.1) (2022-04-07)
+
+
+### Bug Fixes
+
+* get `DRY_RUN` from `env` and do final cleanup ([#38](https://github.com/krakenjs/grabthar-release/issues/38)) ([7295349](https://github.com/krakenjs/grabthar-release/commit/72953497093677e40a39ab7bd6195914ad1be64d))
+
 ## [2.2.0](https://github.com/krakenjs/grabthar-release/compare/v2.1.6...v2.2.0) (2022-04-07)
 
 
