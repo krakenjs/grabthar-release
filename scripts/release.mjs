@@ -94,7 +94,7 @@ if (DRY_RUN) {
 
     await $`git checkout package.json`;
     await $`git checkout package-lock.json || echo 'Package lock not found'`;
-    await $`git checkout .`;
+    await $`git clean -f && git checkout .`;
 } else {
     await $`git checkout package.json`;
     await $`git checkout package-lock.json || echo 'Package lock not found'`;
