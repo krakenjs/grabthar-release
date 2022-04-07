@@ -5,15 +5,13 @@ import { cwd, env } from 'process';
 import { createRequire } from 'module';
 import crypto from 'crypto';
 
-import { $, question, fetch, argv } from 'zx';
+import { $, question, fetch } from 'zx';
 
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
 
-let { NPM_TOKEN } = env;
+let { NPM_TOKEN, DRY_RUN } = env;
 NPM_TOKEN = NPM_TOKEN || '';
-
-let { DRY_RUN } = argv;
 DRY_RUN = DRY_RUN === 'true';
 
 const noGitTag = DRY_RUN ? '--no-git-tag-version' : '';
