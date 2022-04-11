@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.2](https://github.com/krakenjs/grabthar-release/compare/v2.2.1...v2.2.2) (2022-04-11)
+
+
+* move devDependencies to [@krakenjs](https://github.com/krakenjs) scope ([#39](https://github.com/krakenjs/grabthar-release/issues/39)) ([6863a02](https://github.com/krakenjs/grabthar-release/commit/6863a02b5ffb750d2a429c23a413b3bfa4ccf7b0))
+
 ### [2.2.1](https://github.com/krakenjs/grabthar-release/compare/v2.2.0...v2.2.1) (2022-04-07)
 
 
