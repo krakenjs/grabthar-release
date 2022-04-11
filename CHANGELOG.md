@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.3](https://github.com/krakenjs/grabthar-release/compare/v2.2.2...v2.2.3) (2022-04-11)
+
+
+### Bug Fixes
+
+* access `stdout` property before `trim()` ([#40](https://github.com/krakenjs/grabthar-release/issues/40)) ([a131c98](https://github.com/krakenjs/grabthar-release/commit/a131c98da4e7cb58bc3cb98329ceabff23122a9d))
+
 ### [2.2.2](https://github.com/krakenjs/grabthar-release/compare/v2.2.1...v2.2.2) (2022-04-11)
 
 
