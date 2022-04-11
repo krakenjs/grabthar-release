@@ -41,8 +41,7 @@ while (LOCAL_VERSION !== npm_public_registry_version) {
     console.log(`Version mismatch between local version ${ LOCAL_VERSION } and npm version ${ npm_public_registry_version }. Trying again in ${ interval } seconds...`);
     await $`sleep ${ interval }`;
     npm_public_registry_version = await $`npm view ${ PACKAGE_NAME } dist-tags.${ DIST_TAG }`;
-    npm_public_registry_version = npm_public_registry_version.stdout;
-    npm_public_registry_version = npm_public_registry_version.trim();
+    npm_public_registry_version = npm_public_registry_version.stdout.trim();
     counter += interval;
 }
 
