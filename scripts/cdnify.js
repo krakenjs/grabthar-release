@@ -49,7 +49,8 @@ const getOptions = () => {
         { name: 'disttag',       type: String,  defaultValue: process.env.DIST_TAG       || 'latest' },
         { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) },
         { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) },
-        { name: 'versionsToKeep',    type: Number, defaultValue: process.env.VERSIONS_TO_KEEP || 0  }
+        { name: 'versionsToKeep',    type: Number, defaultValue: process.env.VERSIONS_TO_KEEP || 0  },
+        { name: 'experimental-versioned-cdn',    type: Boolean, defaultValue: false }
     ], {
         partial: true
     });
@@ -70,6 +71,7 @@ const getOptions = () => {
 
     options.module = options.module || getPackage().name;
     options.namespace = options.namespace || getNodeOps().web.staticNamespace;
+    options.version = options.version || getPackage().version;
 
     if (!options.module) {
         throw new Error(`Module name required`);
@@ -87,6 +89,7 @@ const getOptions = () => {
 };
 
 type CdnifyGenerateModuleOptions = {|
+    cdnFolderPath : string,
     cdnNamespace : string,
     name : string,
     version : string,
@@ -119,7 +122,7 @@ const getVersionsToKeep = async ({ options, name, parentName } : {|options : Obj
 
 };
 
-const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName } : CdnifyGenerateModuleOptions, options) => {
+const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName, cdnFolderPath } : CdnifyGenerateModuleOptions, options) => {
     const pkgInfo = await info(name, options.disttag);
 
     if (!version) {
@@ -140,7 +143,7 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName } 
 
     const sanitizedName = name.replace('@', '');
 
-    const cdnModuleDir = join(options.cdnpath, sanitizedName);
+    const cdnModuleDir = join(cdnFolderPath, sanitizedName);
     const cdnModuleTarballDir = join(cdnModuleDir, options.tarballfolder);
 
     const cdnModuleInfoFile = join(cdnModuleDir, options.infofile);
@@ -184,15 +187,15 @@ const cdnifyGenerateModule = async ({ cdnNamespace, name, version, parentName } 
     await outputFile(cdnModuleInfoFile, JSON.stringify(pkgInfo, null, 4));
 };
 
-const cdnifyGenerate = async (options) => {
+const generateCdnModuleStructure = async (options) => {
     const name = options.module;
-    const cdnNamespace = options.namespace;
 
     for (const version of await getVersionsToKeep({ options, name })) {
         await cdnifyGenerateModule({
-            cdnNamespace,
+            cdnNamespace:  options.cdnNamespace,
             name,
-            version
+            version,
+            cdnFolderPath: options.cdnFolderPath
         }, options);
 
         if (options.recursive) {
@@ -204,13 +207,32 @@ const cdnifyGenerate = async (options) => {
                 dependencyVersion = dependencyVersion.toString();
 
                 await cdnifyGenerateModule({
-                    cdnNamespace,
+                    cdnNamespace:  options.cdnNamespace,
+                    cdnFolderPath: options.cdnFolderPath,
                     name:          dependencyName,
                     version:       dependencyVersion,
                     parentName:    name
                 }, options);
             }));
         }
+    }
+};
+
+const cdnifyGenerate = async (options) => {
+    const shouldUseVersionedFolder = options['experimental-versioned-cdn'];
+
+    await generateCdnModuleStructure({
+        ...options,
+        cdnFolderPath: options.cdnpath,
+        cdnNamespace:  options.namespace
+    });
+
+    if (shouldUseVersionedFolder) {
+        await generateCdnModuleStructure({
+            ...options,
+            cdnFolderPath: `${ options.cdnpath }/${ options.version }`,
+            cdnNamespace:  `${ options.namespace }/${ options.version }`
+        });
     }
 };
 
