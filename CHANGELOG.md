@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/krakenjs/grabthar-release/compare/v2.2.3...v2.3.0) (2022-05-10)
+
+
+### Features
+
+* add option to create versioned folder ([#42](https://github.com/krakenjs/grabthar-release/issues/42)) ([801468e](https://github.com/krakenjs/grabthar-release/commit/801468e4c7ca022fc73f2ea8514e0fe061152d13))
+
 ### [2.2.3](https://github.com/krakenjs/grabthar-release/compare/v2.2.2...v2.2.3) (2022-04-11)
 
 

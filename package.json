@@ -1,6 +1,6 @@
 {
   "name": "@krakenjs/grabthar-release",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "description": "Helper scripts for grabthar releases.",
   "main": "index.js",
   "scripts": {
