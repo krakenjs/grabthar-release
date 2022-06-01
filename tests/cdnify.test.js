@@ -8,7 +8,7 @@ import { promises as fs } from 'fs';
 
 import mockArgv from 'mock-argv';
 import fetchMock from 'node-fetch';
-import { exists, remove, writeJson, ensureFile, readJson } from 'fs-extra';
+import { exists, remove, writeJson, ensureFile, readJson, ensureDir } from 'fs-extra';
 
 import { run } from '../scripts/cdnify';
 import { clearInfoCache } from '../scripts/grabthar-utils';
@@ -78,6 +78,8 @@ describe('cdnify', () => {
 
     beforeEach(async () => {
         const packageJsonPath = join(process.cwd(), 'package.json');
+
+        await ensureDir(cdnPath);
 
         if (!(await exists(packageJsonPath))) {
             await ensureFile(packageJsonPath);
@@ -536,6 +538,49 @@ describe('cdnify', () => {
             expect(await fs.readdir(join(versionedCdnPath, releasePackagePath, tarballsPath))).toHaveLength(1);
             expect(await fs.readdir(join(versionedCdnPath, testPackagePath, tarballsPath))).toHaveLength(1);
             expect(await fs.readdir(join(versionedCdnPath, pantsPath, tarballsPath))).toHaveLength(1);
+        });
+    });
+
+    describe('removing previously generated versioned folders', () => {
+        const testDirs = [ 'paypal', 'krakenjs', '5.0.1', '5.0.2' ];
+
+        beforeEach(async () => {
+            for (const dir of testDirs) {
+                await ensureDir(join(cdnPath, dir));
+            }
+        });
+
+        afterEach(async () => {
+            for (const dir of testDirs) {
+                await remove(join(cdnPath, dir));
+            }
+        });
+
+        test('should only remove folders that are valid semver', async () => {
+            const releasePackage = createInfoPackage({
+                'name':      '@org/release-package',
+                'latest':   '1.0.0',
+                'versions': [ createVersion({
+                    'version': '1.0.0',
+                    'name':         '@org/release-package'
+                })
+                ]
+            });
+
+            mockNpmRequest(releasePackage.name, releasePackage);
+
+            await mockArgv([
+                '--commitonly',
+                '--recursive',
+                '--experimental-versioned-cdn',
+                '--module', releasePackage.name,
+                '--cdn', 'https://www.fakecdn.com',
+                '--namespace', 'fake-namespace'
+            ], async () => {
+                await run();
+            });
+
+            expect((await fs.readdir(join(cdnPath)))).toEqual([ '23.44.3', 'krakenjs', 'org', 'paypal' ]);
         });
     });
 });

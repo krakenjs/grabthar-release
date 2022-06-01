@@ -5,6 +5,7 @@
 
 import { join, extname } from 'path';
 import { userInfo } from 'os';
+import { promises as fs  } from 'fs';
 
 import nodeFetch from 'node-fetch';
 import fetchRetry from '@vercel/fetch-retry';
@@ -218,8 +219,20 @@ const generateCdnModuleStructure = async (options) => {
     }
 };
 
+const cleanupOldGeneratedVersionedFolders = async (options) => {
+    const items = await fs.readdir(options.cdnpath);
+    // $FlowFixMe incompatible-call
+    const previousVersionedDirectories = items.filter(valid);
+
+    for (const directory of previousVersionedDirectories) {
+        await remove(join(options.cdnpath, directory));
+    }
+};
+
 const cdnifyGenerate = async (options) => {
     const shouldUseVersionedFolder = options['experimental-versioned-cdn'];
+
+    await cleanupOldGeneratedVersionedFolders(options);
 
     await generateCdnModuleStructure({
         ...options,
