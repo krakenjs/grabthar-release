@@ -145,23 +145,23 @@ describe('cdnify', () => {
                 await run();
             });
 
-            expect((await fs.readdir(join(cdnPath))).length).toEqual(4);
+            expect((await fs.readdir(join(versionedCdnPath))).length).toEqual(4);
 
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(1);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(1);
 
-            expect(await exists(join(cdnPath, 'test-org', 'test-package', 'info.json'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'test-org', 'test-package', 'tarballs', '5.0.2.tgz'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'test-org', 'test-package', 'tarballs'))).length).toEqual(1);
+            expect(await exists(join(versionedCdnPath, 'test-org', 'test-package', 'info.json'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'test-org', 'test-package', 'tarballs', '5.0.2.tgz'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'test-org', 'test-package', 'tarballs'))).length).toEqual(1);
 
-            expect(await exists(join(cdnPath, 'pre-human', 'info.json'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'pre-human', 'tarballs', '42.0.0.tgz'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'pre-human', 'tarballs'))).length).toEqual(1);
+            expect(await exists(join(versionedCdnPath, 'pre-human', 'info.json'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'pre-human', 'tarballs', '42.0.0.tgz'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'pre-human', 'tarballs'))).length).toEqual(1);
 
-            expect(await exists(join(cdnPath, 'pants', 'info.json'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'pants', 'tarballs', '1.0.0.tgz'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'pants', 'tarballs'))).length).toEqual(1);
+            expect(await exists(join(versionedCdnPath, 'pants', 'info.json'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'pants', 'tarballs', '1.0.0.tgz'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'pants', 'tarballs'))).length).toEqual(1);
         });
 
         test('should prune any version not in dist-tags', async () => {
@@ -197,14 +197,14 @@ describe('cdnify', () => {
                 await run();
             });
 
-            expect((await fs.readdir(join(cdnPath))).length).toEqual(1);
+            expect((await fs.readdir(join(versionedCdnPath))).length).toEqual(1);
 
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(3);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(3);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(false);
         });
 
         test('should keep number of specified versions', async () => {
@@ -248,16 +248,16 @@ describe('cdnify', () => {
                 await run();
             });
 
-            expect((await fs.readdir(join(cdnPath))).length).toEqual(1);
+            expect((await fs.readdir(join(versionedCdnPath))).length).toEqual(1);
 
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(5);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '6.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '5.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(5);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '6.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '5.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
         });
 
         test('should ignore prelease versions that are not listed in dist tags', async () => {
@@ -309,18 +309,18 @@ describe('cdnify', () => {
                 await run();
             });
 
-            expect((await fs.readdir(join(cdnPath))).length).toEqual(1);
+            expect((await fs.readdir(join(versionedCdnPath))).length).toEqual(1);
 
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(4);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '4.0.0-alpha.0.tgz'))).toEqual(false);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '3.0.0-alpha.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '2.0.0-alpha.0.tgz'))).toEqual(false);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '1.0.0.-alpha.0tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(4);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '4.0.0-alpha.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '3.0.0-alpha.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '2.0.0-alpha.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '1.0.0.-alpha.0tgz'))).toEqual(false);
         });
 
         test('should keep number of specified versions for sub-dependencies', async () => {
@@ -420,31 +420,31 @@ describe('cdnify', () => {
                 await run();
             });
 
-            expect((await fs.readdir(join(cdnPath))).length).toEqual(3);
+            expect((await fs.readdir(join(versionedCdnPath))).length).toEqual(3);
 
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(3);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'org', 'release-package', 'tarballs'))).length).toEqual(3);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '4.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'org', 'release-package', 'tarballs', '1.0.0.tgz'))).toEqual(false);
 
-            expect(await exists(join(cdnPath, 'sub-dependency-one', 'info.json'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'sub-dependency-one', 'tarballs'))).length).toEqual(3);
-            expect(await exists(join(cdnPath, 'sub-dependency-one', 'tarballs', '16.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'sub-dependency-one', 'tarballs', '15.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'sub-dependency-one', 'tarballs', '14.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'sub-dependency-one', 'tarballs', '13.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-one', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'sub-dependency-one', 'tarballs'))).length).toEqual(3);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-one', 'tarballs', '16.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-one', 'tarballs', '15.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-one', 'tarballs', '14.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-one', 'tarballs', '13.0.0.tgz'))).toEqual(false);
 
-            expect(await exists(join(cdnPath, 'sub-dependency-two', 'info.json'))).toEqual(true);
-            expect((await fs.readdir(join(cdnPath, 'sub-dependency-two', 'tarballs'))).length).toEqual(2);
-            expect(await exists(join(cdnPath, 'sub-dependency-two', 'tarballs', '4.0.0.tgz'))).toEqual(false);
-            expect(await exists(join(cdnPath, 'sub-dependency-two', 'tarballs', '3.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'sub-dependency-two', 'tarballs', '2.0.0.tgz'))).toEqual(true);
-            expect(await exists(join(cdnPath, 'sub-dependency-two', 'tarballs', '1.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-two', 'info.json'))).toEqual(true);
+            expect((await fs.readdir(join(versionedCdnPath, 'sub-dependency-two', 'tarballs'))).length).toEqual(2);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-two', 'tarballs', '4.0.0.tgz'))).toEqual(false);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-two', 'tarballs', '3.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-two', 'tarballs', '2.0.0.tgz'))).toEqual(true);
+            expect(await exists(join(versionedCdnPath, 'sub-dependency-two', 'tarballs', '1.0.0.tgz'))).toEqual(false);
         });
 
-        test('should create correct cdn folder structure with experimental versioned flag', async () => {
+        test('should create correct cdn folder structure with legacy overwrite flag', async () => {
             const testOrgTestPackage = createInfoPackage({
                 'name':      '@test-org/test-package',
                 'latest':   '5.0.2',
@@ -477,7 +477,7 @@ describe('cdnify', () => {
                 '--module', releasePackage.name,
                 '--cdn', 'https://www.fakecdn.com',
                 '--namespace', 'fake-namespace',
-                '--experimental-versioned-cdn'
+                '--legacy-overwrite-cdn'
             ], async () => {
                 await run();
             });
@@ -572,7 +572,6 @@ describe('cdnify', () => {
             await mockArgv([
                 '--commitonly',
                 '--recursive',
-                '--experimental-versioned-cdn',
                 '--module', releasePackage.name,
                 '--cdn', 'https://www.fakecdn.com',
                 '--namespace', 'fake-namespace'
@@ -580,7 +579,7 @@ describe('cdnify', () => {
                 await run();
             });
 
-            expect((await fs.readdir(join(cdnPath)))).toEqual([ '23.44.3', 'krakenjs', 'org', 'paypal' ]);
+            expect((await fs.readdir(join(cdnPath)))).toEqual([ '23.44.3', 'krakenjs', 'paypal' ]);
         });
     });
 });

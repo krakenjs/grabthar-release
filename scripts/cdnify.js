@@ -51,7 +51,7 @@ const getOptions = () => {
         { name: 'deployonly',    type: Boolean, defaultValue: booleanEnv(process.env.DEPOY_ONLY) },
         { name: 'commitonly',    type: Boolean, defaultValue: booleanEnv(process.env.COMMIT_ONLY) },
         { name: 'versionsToKeep',    type: Number, defaultValue: process.env.VERSIONS_TO_KEEP || 0  },
-        { name: 'experimental-versioned-cdn',    type: Boolean, defaultValue: false }
+        { name: 'legacy-overwrite-cdn',    type: Boolean, defaultValue: false }
     ], {
         partial: true
     });
@@ -230,21 +230,21 @@ const cleanupOldGeneratedVersionedFolders = async (options) => {
 };
 
 const cdnifyGenerate = async (options) => {
-    const shouldUseVersionedFolder = options['experimental-versioned-cdn'];
+    const shouldDoLegacyOverwrite = options['legacy-overwrite-cdn'];
 
     await cleanupOldGeneratedVersionedFolders(options);
 
     await generateCdnModuleStructure({
         ...options,
-        cdnFolderPath: options.cdnpath,
-        cdnNamespace:  options.namespace
+        cdnFolderPath: `${ options.cdnpath }/${ options.version }`,
+        cdnNamespace:  `${ options.namespace }/${ options.version }`
     });
 
-    if (shouldUseVersionedFolder) {
+    if (shouldDoLegacyOverwrite) {
         await generateCdnModuleStructure({
             ...options,
-            cdnFolderPath: `${ options.cdnpath }/${ options.version }`,
-            cdnNamespace:  `${ options.namespace }/${ options.version }`
+            cdnFolderPath: options.cdnpath,
+            cdnNamespace:  options.namespace
         });
     }
 };
