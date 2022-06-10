@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/krakenjs/grabthar-release/compare/v2.4.0...v3.0.0) (2022-06-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* always version folders under cdn path (#44)
+
+### Features
+
+* always version folders under cdn path ([#44](https://github.com/krakenjs/grabthar-release/issues/44)) ([3da291c](https://github.com/krakenjs/grabthar-release/commit/3da291c1e8525c394bc7e727d3a9aeca2687c03a))
+
 ## [2.4.0](https://github.com/krakenjs/grabthar-release/compare/v2.3.0...v2.4.0) (2022-06-08)
 
 
