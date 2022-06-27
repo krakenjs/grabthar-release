@@ -1,48 +1,48 @@
 #!/usr/bin/env node
 /* eslint flowtype/require-valid-file-annotation: off, security/detect-non-literal-require: off, no-console: off */
 
-import { cwd, env } from 'process';
-import { createRequire } from 'module';
-import crypto from 'crypto';
+import { cwd, env } from "process";
+import { createRequire } from "module";
+import crypto from "crypto";
 
-import { $, question, fetch } from 'zx';
+import { $, question, fetch } from "zx";
 
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
 
 let { NPM_TOKEN, DRY_RUN } = env;
-NPM_TOKEN = NPM_TOKEN || '';
-DRY_RUN = DRY_RUN === 'true';
+NPM_TOKEN = NPM_TOKEN || "";
+DRY_RUN = DRY_RUN === "true";
 
-const noGitTag = DRY_RUN ? '--no-git-tag-version' : '';
-const dryRun = DRY_RUN ? '--dry-run' : '';
+const noGitTag = DRY_RUN ? "--no-git-tag-version" : "";
+const dryRun = DRY_RUN ? "--dry-run" : "";
 
-let BUMP = 'patch';
-let DIST_TAG = 'latest';
+let BUMP = "patch";
+let DIST_TAG = "latest";
 let twoFactorCode;
 
 let { stdout: REMOTE_URL } = await $`git config --get remote.origin.url`;
 REMOTE_URL = REMOTE_URL.trim();
 
-if (REMOTE_URL.includes('.git')) {
-    REMOTE_URL = REMOTE_URL.replace('.git', '');
+if (REMOTE_URL.includes(".git")) {
+  REMOTE_URL = REMOTE_URL.replace(".git", "");
 }
 
 const isForked = async () => {
-    const { pathname } = new URL(`${ REMOTE_URL }`);
-    const data = await fetch(`https://api.github.com/repos${ pathname }`);
-    const jsonData = await data.json();
-    if (jsonData.message === 'Not Found') {
-        throw new Error('Repo not found via the GitHub Repos API.');
-    }
-    const { fork } = jsonData;
-    return fork;
+  const { pathname } = new URL(`${REMOTE_URL}`);
+  const data = await fetch(`https://api.github.com/repos${pathname}`);
+  const jsonData = await data.json();
+  if (jsonData.message === "Not Found") {
+    throw new Error("Repo not found via the GitHub Repos API.");
+  }
+  const { fork } = jsonData;
+  return fork;
 };
 
 const forked = await isForked();
 
 if (forked) {
-    throw new Error('Publishing from a fork is not allowed.');
+  throw new Error("Publishing from a fork is not allowed.");
 }
 
 await $`grabthar-validate-git`;
@@ -52,60 +52,65 @@ await $`grabthar-validate-npm`;
 
 let { stdout: CURRENT_BRANCH } = await $`git rev-parse --abbrev-ref HEAD`;
 CURRENT_BRANCH = CURRENT_BRANCH.trim();
-let { stdout: DEFAULT_BRANCH } = await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
+let { stdout: DEFAULT_BRANCH } =
+  await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
-const UID = crypto.randomBytes(4).toString('hex');
+const UID = crypto.randomBytes(4).toString("hex");
 
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
-    BUMP = 'prerelease';
-    DIST_TAG = 'alpha';
-    await $`npm ${ noGitTag } version ${ BUMP } --preid=${ DIST_TAG }-${ UID }`;
+  BUMP = "prerelease";
+  DIST_TAG = "alpha";
+  await $`npm ${noGitTag} version ${BUMP} --preid=${DIST_TAG}-${UID}`;
 } else {
-    await $`npm ${ noGitTag } version ${ BUMP }`;
+  await $`npm ${noGitTag} version ${BUMP}`;
 }
 
 if (DRY_RUN) {
-    console.log(`git push`);
-    console.log(`git push --tags`);
+  console.log(`git push`);
+  console.log(`git push --tags`);
 } else {
-    await $`git push`;
-    await $`git push --tags`;
+  await $`git push`;
+  await $`git push --tags`;
 }
 
 await $`grabthar-flatten`;
 
 if (NPM_TOKEN) {
-    await $`NPM_TOKEN=${ NPM_TOKEN } npm publish ${ dryRun } --tag ${ DIST_TAG }`;
+  await $`NPM_TOKEN=${NPM_TOKEN} npm publish ${dryRun} --tag ${DIST_TAG}`;
 } else {
-    twoFactorCode = await question('NPM 2FA Code: ');
-    await $`npm publish ${ dryRun } --tag ${ DIST_TAG } --otp ${ twoFactorCode }`;
+  twoFactorCode = await question("NPM 2FA Code: ");
+  await $`npm publish ${dryRun} --tag ${DIST_TAG} --otp ${twoFactorCode}`;
 }
 
 if (DRY_RUN) {
-    const CWD = cwd();
-    const { version: LOCAL_VERSION } = require(`${ CWD }/package.json`);
+  const CWD = cwd();
+  const { version: LOCAL_VERSION } = require(`${CWD}/package.json`);
 
-    console.log(`grabthar-verify-npm-publish --LOCAL_VERSION=${ LOCAL_VERSION } --DIST_TAG=${ DIST_TAG }`);
+  console.log(
+    `grabthar-verify-npm-publish --LOCAL_VERSION=${LOCAL_VERSION} --DIST_TAG=${DIST_TAG}`
+  );
 
-    if (DIST_TAG === 'latest') {
-        console.log(`grabthar-activate --LOCAL_VERSION=${ LOCAL_VERSION } --CDNIFY=false --ENVS=test,local,stage`);
-    }
+  if (DIST_TAG === "latest") {
+    console.log(
+      `grabthar-activate --LOCAL_VERSION=${LOCAL_VERSION} --CDNIFY=false --ENVS=test,local,stage`
+    );
+  }
 
-    await $`git checkout package.json`;
-    await $`git checkout package-lock.json || echo 'Package lock not found'`;
-    await $`git clean -f && git checkout .`;
+  await $`git checkout package.json`;
+  await $`git checkout package-lock.json || echo 'Package lock not found'`;
+  await $`git clean -f && git checkout .`;
 } else {
-    await $`git checkout package.json`;
-    await $`git checkout package-lock.json || echo 'Package lock not found'`;
-    
-    const CWD = cwd();
-    const { version: LOCAL_VERSION } = require(`${ CWD }/package.json`);
-    
-    await $`grabthar-verify-npm-publish --LOCAL_VERSION=${ LOCAL_VERSION } --DIST_TAG=${ DIST_TAG }`;
-    
-    // update non-prod dist tags whenever the latest dist tag changes
-    if (DIST_TAG === 'latest') {
-        await $`grabthar-activate --LOCAL_VERSION=${ LOCAL_VERSION } --CDNIFY=false --ENVS=test,local,stage`;
-    }
+  await $`git checkout package.json`;
+  await $`git checkout package-lock.json || echo 'Package lock not found'`;
+
+  const CWD = cwd();
+  const { version: LOCAL_VERSION } = require(`${CWD}/package.json`);
+
+  await $`grabthar-verify-npm-publish --LOCAL_VERSION=${LOCAL_VERSION} --DIST_TAG=${DIST_TAG}`;
+
+  // update non-prod dist tags whenever the latest dist tag changes
+  if (DIST_TAG === "latest") {
+    await $`grabthar-activate --LOCAL_VERSION=${LOCAL_VERSION} --CDNIFY=false --ENVS=test,local,stage`;
+  }
 }
