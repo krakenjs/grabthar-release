@@ -125,8 +125,9 @@
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
-    "@krakenjs/grumbler-scripts": "^7.0.0",
+    "@krakenjs/grumbler-scripts": "^8.0.4",
     "fetch-mock-jest": "^1.5.1",
+    "flow-typed": "^3.8.0",
     "husky": "^7.0.4",
     "jest": "^27.5.1",
     "lint-staged": "^12.4.0",
