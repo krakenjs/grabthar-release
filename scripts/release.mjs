@@ -48,9 +48,10 @@ if (forked) {
 await $`grabthar-validate-git`;
 await $`grabthar-validate-npm`;
 
+const startCommitCount = await $`git rev-list --count HEAD`;
+
 // This will determine the type of release based on the git branch. When the default branch is used, it will be a `patch` that's published to npm under the `latest` dist-tag. Any other branch will be a `prelease` that's published to npm under the `alpha` dist-tag.
 
-const startCommitCount = await $`git rev-list --count HEAD`;
 let { stdout: CURRENT_BRANCH } = await $`git rev-parse --abbrev-ref HEAD`;
 CURRENT_BRANCH = CURRENT_BRANCH.trim();
 let { stdout: DEFAULT_BRANCH } =
@@ -115,10 +116,11 @@ if (DRY_RUN) {
     await $`grabthar-activate --LOCAL_VERSION=${LOCAL_VERSION} --CDNIFY=false --ENVS=test,local,stage`;
   }
 
-  // reset feature branch after publishing alpha release
+  // reset feature branch after publishing an alpha release
   if (DIST_TAG === "alpha") {
-    const endCommitCount = $`git rev-list --count HEAD`;
+    const endCommitCount = await $`git rev-list --count HEAD`;
     const commitDelta = endCommitCount - startCommitCount;
+
     if (commitDelta > 0) {
       await $`git reset --hard HEAD~${commitDelta}`;
       await $`git push --force-with-lease`;
