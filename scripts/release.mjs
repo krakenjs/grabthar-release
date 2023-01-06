@@ -57,7 +57,7 @@ let { stdout: DEFAULT_BRANCH } =
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
 let { stdout: startCommitCount } =
-  await $`git rev-list --count ${CURRENT_BRANCH}`;
+  await $`git rev-list --count ${CURRENT_BRANCH} ^${DEFAULT_BRANCH}`;
 startCommitCount = startCommitCount.trim();
 
 const UID = crypto.randomBytes(4).toString("hex");
@@ -121,7 +121,7 @@ if (DRY_RUN) {
   // reset feature branch after publishing an alpha release
   if (DIST_TAG === "alpha") {
     let { stdout: endCommitCount } =
-      await $`git rev-list --count ${CURRENT_BRANCH}`;
+      await $`git rev-list --count ${CURRENT_BRANCH} ^${DEFAULT_BRANCH}`;
     endCommitCount = endCommitCount.trim();
 
     const commitDelta = endCommitCount - startCommitCount;
