@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.6.0](https://github.com/krakenjs/grabthar-release/compare/v3.0.0...v3.6.0) (2023-01-06)
+
+
+### Features
+
+* hardcode # of commits to reset ([c7f7475](https://github.com/krakenjs/grabthar-release/commit/c7f747577570d744a09d63a90cfccded01a134dc))
+* reset feature branch after alpha release ([7d90a1b](https://github.com/krakenjs/grabthar-release/commit/7d90a1b04b30ad058683bfb059cdd9c1208c29e5))
+* upgrade to grumbler scripts 8 ([#46](https://github.com/krakenjs/grabthar-release/issues/46)) ([6d70084](https://github.com/krakenjs/grabthar-release/commit/6d7008472a34420ffb997c6dbdc03ba5b6ad5028))
+
+
+### Bug Fixes
+
+* add await ([9e80498](https://github.com/krakenjs/grabthar-release/commit/9e804983bab544382e7a84ea76fd9c371c446989))
+* count commits made since creating branch ([48210a4](https://github.com/krakenjs/grabthar-release/commit/48210a4335f50c76d8f55ca30762f94dc75f64b4))
+* destructure stdout and trim newline ([c7806e7](https://github.com/krakenjs/grabthar-release/commit/c7806e7f21adbd0d492c77733989e3d8977af3f7))
+* specify branch for commit count ([bfee86f](https://github.com/krakenjs/grabthar-release/commit/bfee86f30dbb10810ba560b9ecf853736cb1e8f1))
+
+
+* temp version bump for testing ([3aab11e](https://github.com/krakenjs/grabthar-release/commit/3aab11e86e8e59104456b68dfcd0f3c0acfd5532))
+* use prettier ([#41](https://github.com/krakenjs/grabthar-release/issues/41)) ([6c2cabb](https://github.com/krakenjs/grabthar-release/commit/6c2cabb70876d574a0a6044b5831404b85bd8b1a))
+
 ## [3.0.0](https://github.com/krakenjs/grabthar-release/compare/v2.4.0...v3.0.0) (2022-06-10)
 
 
