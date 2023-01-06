@@ -56,10 +56,6 @@ let { stdout: DEFAULT_BRANCH } =
   await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
-let { stdout: startCommitCount } =
-  await $`git rev-list --count ${CURRENT_BRANCH} ^${DEFAULT_BRANCH}`;
-startCommitCount = startCommitCount.trim();
-
 const UID = crypto.randomBytes(4).toString("hex");
 
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
@@ -120,15 +116,7 @@ if (DRY_RUN) {
 
   // reset feature branch after publishing an alpha release
   if (DIST_TAG === "alpha") {
-    let { stdout: endCommitCount } =
-      await $`git rev-list --count ${CURRENT_BRANCH} ^${DEFAULT_BRANCH}`;
-    endCommitCount = endCommitCount.trim();
-
-    const commitDelta = endCommitCount - startCommitCount;
-
-    if (commitDelta > 0) {
-      await $`git reset --hard HEAD~${commitDelta}`;
-      await $`git push --force-with-lease`;
-    }
+    await $`git reset --hard HEAD~3`;
+    await $`git push --force-with-lease`;
   }
 }
