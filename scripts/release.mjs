@@ -116,7 +116,7 @@ if (DRY_RUN) {
 
   // reset feature branch after publishing an alpha release
   if (DIST_TAG === "alpha") {
-    await $`git reset --hard HEAD~3`;
+    await $`git reset --hard ${CURRENT_BRANCH}~3`;
     await $`git push --force-with-lease`;
   }
 }
