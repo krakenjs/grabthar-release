@@ -56,6 +56,23 @@ let { stdout: DEFAULT_BRANCH } =
   await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
+const getCommitCount = async () => {
+  const { pathname } = new URL(`${REMOTE_URL}`);
+  const branchData = await fetch(
+    `https://api.github.com/repos${pathname}/compare/${DEFAULT_BRANCH}...${CURRENT_BRANCH}`
+  );
+  const branchJSONData = await branchData.json();
+
+  if (branchJSONData?.message === "Not Found") {
+    throw new Error("Branch not found via the GitHub Repos API.");
+  }
+
+  const { total_commits } = branchJSONData;
+
+  return total_commits;
+};
+
+const commitCount = await getCommitCount();
 const UID = crypto.randomBytes(4).toString("hex");
 
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
@@ -116,7 +133,7 @@ if (DRY_RUN) {
 
   // reset feature branch after publishing an alpha release
   if (DIST_TAG === "alpha") {
-    await $`git reset --hard ${CURRENT_BRANCH}~3`;
+    await $`git reset --hard ${CURRENT_BRANCH}~${commitCount}`;
     await $`git push --force-with-lease`;
   }
 }
