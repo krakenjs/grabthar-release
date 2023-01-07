@@ -64,7 +64,7 @@ const getCommitCount = async () => {
   const branchJSONData = await branchData.json();
 
   if (branchJSONData?.message === "Not Found") {
-    throw new Error("Branch not found via the GitHub Repos API.");
+    throw new Error("Branch not found via the GitHub Branches API.");
   }
 
   const { total_commits } = branchJSONData;
