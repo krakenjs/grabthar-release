@@ -72,7 +72,7 @@ const getCommitCount = async () => {
   return total_commits;
 };
 
-const commitCount = await getCommitCount();
+const startCommitCount = await getCommitCount();
 const UID = crypto.randomBytes(4).toString("hex");
 
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
@@ -133,7 +133,12 @@ if (DRY_RUN) {
 
   // reset feature branch after publishing an alpha release
   if (DIST_TAG === "alpha") {
-    await $`git reset --hard ${CURRENT_BRANCH}~${commitCount}`;
-    await $`git push --force-with-lease`;
+    const endCommitCount = await getCommitCount();
+    const commitDelta = endCommitCount - startCommitCount;
+
+    if (commitDelta > 0) {
+      await $`git reset --hard ${CURRENT_BRANCH}~${commitDelta}`;
+      await $`git push --force-with-lease`;
+    }
   }
 }
