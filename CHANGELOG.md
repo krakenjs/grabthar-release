@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.8.0](https://github.com/krakenjs/grabthar-release/compare/v3.0.0...v3.8.0) (2023-01-09)
+
+
+### Features
+
+* upgrade to grumbler scripts 8 ([#46](https://github.com/krakenjs/grabthar-release/issues/46)) ([6d70084](https://github.com/krakenjs/grabthar-release/commit/6d7008472a34420ffb997c6dbdc03ba5b6ad5028))
+
+
+### Bug Fixes
+
+* bump version to match npm ([4127099](https://github.com/krakenjs/grabthar-release/commit/4127099824a452ea0b79fead99a37340936511da))
+
+
+* use prettier ([#41](https://github.com/krakenjs/grabthar-release/issues/41)) ([6c2cabb](https://github.com/krakenjs/grabthar-release/commit/6c2cabb70876d574a0a6044b5831404b85bd8b1a))
+
 ## [3.0.0](https://github.com/krakenjs/grabthar-release/compare/v2.4.0...v3.0.0) (2022-06-10)
 
 
