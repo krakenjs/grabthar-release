@@ -72,12 +72,13 @@ const getCommitCount = async () => {
   return total_commits;
 };
 
-const startCommitCount = await getCommitCount();
 const UID = crypto.randomBytes(4).toString("hex");
+let startCommitCount;
 
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
   BUMP = "prerelease";
   DIST_TAG = "alpha";
+  startCommitCount = await getCommitCount();
   await $`npm ${noGitTag} version ${BUMP} --preid=${DIST_TAG}-${UID}`;
 } else {
   await $`npm ${noGitTag} version ${BUMP}`;
