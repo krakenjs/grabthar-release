@@ -237,7 +237,7 @@ const cdnifyGenerateModule = async (
 
   const tarball = versionInfo.dist && versionInfo.dist.tarball;
 
-  if (!versionInfo) {
+  if (!tarball) {
     throw new Error(`NPM info for ${name}@${version} has no tarball`);
   }
 
