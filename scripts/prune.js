@@ -14,7 +14,7 @@ if (!fs.existsSync(PACKAGE_LOCK)) {
 }
 
 // $FlowFixMe
-const pkgLock = require(PACKAGE_LOCK); // eslint-disable-line security/detect-non-literal-require
+const pkgLock = require(PACKAGE_LOCK);
 
 const flatten = (def) => {
   if (def.dependencies) {
