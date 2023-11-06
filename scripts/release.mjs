@@ -56,11 +56,29 @@ let { stdout: DEFAULT_BRANCH } =
   await $`git remote show origin | sed -n '/HEAD branch/s/.*: //p'`;
 DEFAULT_BRANCH = DEFAULT_BRANCH.trim();
 
+const getCommitCount = async () => {
+  const { pathname } = new URL(`${REMOTE_URL}`);
+  const branchData = await fetch(
+    `https://api.github.com/repos${pathname}/compare/${DEFAULT_BRANCH}...${CURRENT_BRANCH}`
+  );
+  const branchJSONData = await branchData.json();
+
+  if (branchJSONData?.message === "Not Found") {
+    throw new Error("Branch not found via the GitHub Branches API.");
+  }
+
+  const { total_commits } = branchJSONData;
+
+  return total_commits;
+};
+
 const UID = crypto.randomBytes(4).toString("hex");
+let startCommitCount;
 
 if (CURRENT_BRANCH !== DEFAULT_BRANCH) {
   BUMP = "prerelease";
   DIST_TAG = "alpha";
+  startCommitCount = await getCommitCount();
   await $`npm ${noGitTag} version ${BUMP} --preid=${DIST_TAG}-${UID}`;
 } else {
   await $`npm ${noGitTag} version ${BUMP}`;
@@ -112,5 +130,16 @@ if (DRY_RUN) {
   // update non-prod dist tags whenever the latest dist tag changes
   if (DIST_TAG === "latest") {
     await $`grabthar-activate --LOCAL_VERSION=${LOCAL_VERSION} --CDNIFY=false --ENVS=test,local,stage`;
+  }
+
+  // reset feature branch after publishing an alpha release
+  if (DIST_TAG === "alpha") {
+    const endCommitCount = await getCommitCount();
+    const commitDelta = endCommitCount - startCommitCount;
+
+    if (commitDelta > 0) {
+      await $`git reset --hard ${CURRENT_BRANCH}~${commitDelta}`;
+      await $`git push --force-with-lease`;
+    }
   }
 }
