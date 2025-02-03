@@ -116,7 +116,7 @@
     "inquirer": "^7.3.2",
     "libnpmconfig": "^1.2.1",
     "node-fetch": "^2.6.0",
-    "npm": "^6.14.0",
+    "npm": "^9.0.0",
     "parse-diff": "^0.8.1",
     "semver": "^7.3.5",
     "shelljs": "^0.8.4",
