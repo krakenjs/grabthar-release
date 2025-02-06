@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.9.0](https://github.com/krakenjs/grabthar-release/compare/v3.0.0...v3.9.0) (2025-02-06)
+
+
+### Features
+
+* upgrade node-cli to remove ip module dependency ([#51](https://github.com/krakenjs/grabthar-release/issues/51)) ([eba9132](https://github.com/krakenjs/grabthar-release/commit/eba9132801ca5f296888404fec89127fbd46a183))
+* upgrade to grumbler scripts 8 ([#46](https://github.com/krakenjs/grabthar-release/issues/46)) ([6d70084](https://github.com/krakenjs/grabthar-release/commit/6d7008472a34420ffb997c6dbdc03ba5b6ad5028))
+
+
+### Bug Fixes
+
+* fix tarball guard case ([6cc66c3](https://github.com/krakenjs/grabthar-release/commit/6cc66c3195696cd5ba4701edb4ccdd5d3f1b7fbb))
+
+
+* remove token from publish action ([3ecf328](https://github.com/krakenjs/grabthar-release/commit/3ecf328be661dd930f34fcb65a8f656649efe31d))
+* use prettier ([#41](https://github.com/krakenjs/grabthar-release/issues/41)) ([6c2cabb](https://github.com/krakenjs/grabthar-release/commit/6c2cabb70876d574a0a6044b5831404b85bd8b1a))
+
 ## [3.0.0](https://github.com/krakenjs/grabthar-release/compare/v2.4.0...v3.0.0) (2022-06-10)
 
 
