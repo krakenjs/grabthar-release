@@ -12,7 +12,7 @@
     "jest": "jest",
     "test": "npm run format:check && npm run lint && npm run flow && npm run jest",
     "babel": "babel scripts --ignore=node_modules,scripts/*.mjs --out-dir scripts --source-maps inline",
-    "postinstall": "npm_config_registry=https://npm.paypal.com npm install @paypalcorp/web --no-save --proxy='null' --https-proxy='null' || echo 'Unable to install cdnx cli tools'",
+    "postinstall": "npm_config_registry=https://npm.dev.paypalinc.com npm install @paypalcorp/web --no-save --proxy='null' --https-proxy='null' || echo 'Unable to install cdnx cli tools'",
     "prepare": "husky install",
     "prepublishOnly": "npm run babel",
     "release": "standard-version",
