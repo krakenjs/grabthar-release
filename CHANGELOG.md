@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.9.1](https://github.com/krakenjs/grabthar-release/compare/v3.9.0...v3.9.1) (2025-02-28)
+
+
+* update npm config registry ([#52](https://github.com/krakenjs/grabthar-release/issues/52)) ([b24611e](https://github.com/krakenjs/grabthar-release/commit/b24611ead6e1671ccf49979cf46a17622dd88e3c))
+
 ## [3.9.0](https://github.com/krakenjs/grabthar-release/compare/v3.0.0...v3.9.0) (2025-02-06)
 
 
