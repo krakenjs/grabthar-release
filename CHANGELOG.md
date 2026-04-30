@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 3.10.1 (2026-04-30)
+
+
+### Bug Fixes
+
+* update npm publish workflow ([#53](https://github.com/krakenjs/grabthar-release/issues/53)) ([c6d62d3](https://github.com/krakenjs/grabthar-release/commit/c6d62d31a03fb6a82469627f1a316f048d8d548e))
+
 ## [3.10.0](https://github.com/krakenjs/grabthar-release/compare/v3.9.1...v3.10.0) (2026-04-30)
 
 
