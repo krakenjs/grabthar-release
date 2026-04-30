@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.10.0](https://github.com/krakenjs/grabthar-release/compare/v3.9.1...v3.10.0) (2026-04-30)
+
+
+### Features
+
+* add --REJECT flag to grabthar-upgrade ([#54](https://github.com/krakenjs/grabthar-release/issues/54)) ([bafd8c7](https://github.com/krakenjs/grabthar-release/commit/bafd8c7aca1990a7b7597dd8bf4ebe77e4da9665))
+
 ### [3.9.1](https://github.com/krakenjs/grabthar-release/compare/v3.9.0...v3.9.1) (2025-02-28)
 
 
