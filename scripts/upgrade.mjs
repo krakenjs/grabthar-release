@@ -6,7 +6,7 @@ import { createRequire } from "module";
 
 import { $, argv } from "zx";
 
-const { MODULE } = argv;
+const { MODULE, REJECT } = argv;
 const CWD = cwd();
 const moduleMetaUrl = import.meta.url;
 const require = createRequire(moduleMetaUrl);
@@ -16,11 +16,15 @@ const { EXPERIMENTAL_DEPENDENCY_TEST } = env;
 
 await $`grabthar-validate-git`;
 
-if (!MODULE) {
-  await $`npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade`;
-} else {
-  await $`npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade --filter=${MODULE}`;
+const extraArgs = [];
+if (MODULE) {
+  extraArgs.push(`--filter=${MODULE}`);
 }
+if (REJECT) {
+  extraArgs.push(`--reject=${REJECT}`);
+}
+
+await $`npx npm-check-updates --registry='http://registry.npmjs.org' --dep=prod --upgrade ${extraArgs}`;
 
 await $`rm -rf ./node_modules`;
 await $`rm -f ./package-lock.json`;
